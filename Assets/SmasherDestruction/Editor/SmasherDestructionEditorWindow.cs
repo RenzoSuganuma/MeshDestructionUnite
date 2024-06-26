@@ -83,9 +83,17 @@ namespace SmasherDestruction.Editor
             }
 
             _planeRot = EditorGUILayout.Vector3Field("PlaneObject Rotation", _planeRot);
+            if (EditorGUILayout.LinkButton("Reset Value"))
+            {
+                _planeRot = Vector3.zero;
+            }
 
             _planeAnchorPos = EditorGUILayout.Vector3Field("PlaneObject Anchor Pos", _planeAnchorPos);
-            
+            if (EditorGUILayout.LinkButton("Reset Value"))
+            {
+                _planeAnchorPos = Vector3.zero;
+            }
+
             if (PlaneObject is not null)
             {
                 PlaneObject.position = _planeAnchorPos;
