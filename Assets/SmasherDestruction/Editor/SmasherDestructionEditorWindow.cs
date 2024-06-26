@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
@@ -19,8 +20,11 @@ namespace SmasherDestruction.Editor
         public GameObject VictimObject;
         public Transform PlaneObject;
 
+        private string _meshName;
+        private List<GameObject> _cuttedMeshes = new List<GameObject>();
         private SerializedObject _serializedObject;
         private Vector3 _planeAnchorPos, _planeRot;
+        private Material _capMaterial;
         private int _mode;
         private int _fragModeIndex;
 
@@ -29,6 +33,8 @@ namespace SmasherDestruction.Editor
             _serializedObject = new SerializedObject(this);
 
             _planeAnchorPos = _planeRot = Vector3.zero;
+
+            _capMaterial = VictimObject.GetComponent<Material>();
         }
 
         private void Update()
@@ -56,6 +62,10 @@ namespace SmasherDestruction.Editor
             _mode = GUILayout.Toolbar(_mode,
                 new GUIContent[3] { new GUIContent("Ryden"), new GUIContent("ArmStrong"), new GUIContent("Smasher") });
 
+
+            GUILayout.Label("Mesh File Name", SmasherDestructionConstantValues.GetGUIStyle_LabelSmall());
+            _meshName = GUILayout.TextArea(_meshName);
+
             if (GUILayout.Button(
                     _mode switch
                     {
@@ -65,6 +75,20 @@ namespace SmasherDestruction.Editor
                         _ => ""
                     }))
             {
+                switch (_mode)
+                {
+                    case 0:
+                    {
+                        RydenHelper.CutTheMesh(VictimObject, _cuttedMeshes, _planeAnchorPos, PlaneObject.up,
+                            _capMaterial);
+                        break;
+                    }
+                    case 1:
+                    case 2:
+                    {
+                        break;
+                    }
+                }
             }
 
             GUILayout.Space(10);
@@ -104,6 +128,7 @@ namespace SmasherDestruction.Editor
 
             if (GUILayout.Button("Save Mesh"))
             {
+                SaveMesh();
             }
 
             if (GUILayout.Button("Close"))
@@ -118,6 +143,43 @@ namespace SmasherDestruction.Editor
             {
                 _serializedObject.ApplyModifiedProperties();
             }
+        }
+
+        private void SaveMesh()
+        {
+            if (_cuttedMeshes.Count < 1) return;
+
+            ArmStrong.FindSaveTargetDirectory(ArmStrong.CuttedMeshesFolderAbsolutePath + $"{_meshName}/");
+            ArmStrong.FindSaveTargetDirectory(ArmStrong.CuttedMeshesPrefabFolderAbsolutePath);
+
+            _cuttedMeshes[0].name = _meshName;
+
+            // コンポーネントのアタッチ
+            foreach (var cuttedMesh in _cuttedMeshes)
+            {
+                cuttedMesh.AddComponent<MeshCollider>();
+                cuttedMesh.GetComponent<MeshCollider>().sharedMesh = cuttedMesh.GetComponent<MeshFilter>().mesh;
+                cuttedMesh.GetComponent<MeshCollider>().convex = true;
+                cuttedMesh.AddComponent<Rigidbody>();
+            }
+
+            // カットしたメッシュは一つのオブジェクトにする
+            for (int i = 1; i < _cuttedMeshes.Count; ++i)
+            {
+                _cuttedMeshes[i].transform.parent = _cuttedMeshes[0].transform;
+            }
+
+            // 保存処理
+            for (int i = 0; i < _cuttedMeshes.Count; ++i)
+            {
+                var mesh = _cuttedMeshes[i].GetComponent<MeshFilter>().mesh;
+
+                AssetDatabase.CreateAsset(mesh,
+                    ArmStrong.CuttedMeshesFolderAbsolutePath + $"{_meshName}/{mesh.name}_{i}.asset");
+            }
+
+            PrefabUtility.SaveAsPrefabAsset(_cuttedMeshes[0],
+                ArmStrong.CuttedMeshesPrefabFolderAbsolutePath + $"{_meshName}.prefab");
         }
     }
 }
