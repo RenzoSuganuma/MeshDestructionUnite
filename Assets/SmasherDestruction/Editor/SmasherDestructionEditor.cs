@@ -10,7 +10,7 @@ namespace SmasherDestruction.Editor
         [MenuItem("Window/SmasherDestruction")]
         public static void ShowSmasherWindow()
         {
-            var window = CreateWindow<SmasherDestructionEditorWindow>();
+            var window = GetWindow<SmasherDestructionEditorWindow>();
             window.titleContent = new GUIContent("SmasherDestructionEditor");
             window.name = "SmasherDestructionEditor:Tab 1";
         }
