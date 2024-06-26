@@ -5,31 +5,24 @@ using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.UIElements;
 
+#region MEMO
+
+// アセット欄のデータを取得する方法
+// https://note.com/ig_k/n/n907516bc958e
+
+#endregion
+
 namespace SmasherDestruction.Editor
 {
     public class SmasherDestructionEditorWindow : EditorWindow
     {
-        public static ObjectToMakeMeshes Objects { get; private set; }
+        public GameObject Victim;
 
-        [System.Serializable]
-        public class ObjectToMakeMeshes
-        {
-            public GameObject TrackingObject;
-        }
-
-        [SerializeField] private ObjectToMakeMeshes _objects = null;
-
-        private SerializedObject _serializedObject = null;
-
-        [MenuItem("Tools/MyDebugWindow")]
-        private static void Open()
-        {
-            GetWindow<SmasherDestructionEditorWindow>();
-        }
-
+        private SerializedObject _serializedObject;
+        private int _mode;
+        
         private void OnEnable()
         {
-            Objects = _objects;
             _serializedObject = new SerializedObject(this);
         }
 
@@ -38,14 +31,52 @@ namespace SmasherDestruction.Editor
             Repaint(); // 毎フレーム内容が更新されるようにする
         }
 
+        [DrawGizmo(GizmoType.NonSelected)]
         private void OnGUI()
         {
             _serializedObject.Update();
 
             // プロパティを表示して編集可能にする
-            EditorGUILayout.PropertyField(_serializedObject.FindProperty($"{nameof(_objects)}"));
+            EditorGUILayout.TextArea("SmasherDestruction : Experimental",
+                SmasherDestructionConstantValues.GetGUIStyle_LabelBig());
 
-            _serializedObject.ApplyModifiedProperties();
+            if (_serializedObject is not null)
+            {
+                EditorGUILayout.PropertyField(_serializedObject.FindProperty($"{nameof(Victim)}"));
+            }
+
+            GUILayout.Label("Fragmentation Mode", SmasherDestructionConstantValues.GetGUIStyle_LabelSmall());
+
+            _mode = GUILayout.Toolbar(_mode,
+                new GUIContent[3] { new GUIContent("Ryden"), new GUIContent("ArmStrong"), new GUIContent("Smasher") });
+
+            if (GUILayout.Button(
+                    _mode switch
+                    {
+                        0 => "Cut Mesh",
+                        1 => "Frag Mesh",
+                        2 => "Smash Mesh",
+                        _ => ""
+                    }))
+            {
+            }
+
+            if (GUILayout.Button("Save Mesh"))
+            {
+            }
+
+            if (GUILayout.Button("Close"))
+            {
+                _serializedObject.Dispose();
+                _serializedObject = null;
+                _ = _serializedObject;
+                Close();
+            }
+
+            if (_serializedObject is not null)
+            {
+                _serializedObject.ApplyModifiedProperties();
+            }
         }
     }
 }

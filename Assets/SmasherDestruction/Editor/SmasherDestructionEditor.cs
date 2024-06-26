@@ -12,7 +12,6 @@ namespace SmasherDestruction.Editor
         {
             var window = GetWindow<SmasherDestructionEditorWindow>();
             window.titleContent = new GUIContent("SmasherDestructionEditor");
-            window.name = "SmasherDestructionEditor:Tab 1";
         }
     }
 }
