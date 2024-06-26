@@ -16,14 +16,19 @@ namespace SmasherDestruction.Editor
 {
     public class SmasherDestructionEditorWindow : EditorWindow
     {
-        public GameObject Victim;
+        public GameObject VictimObject;
+        public Transform PlaneObject;
 
         private SerializedObject _serializedObject;
+        private Vector3 _planeAnchorPos, _planeRot;
         private int _mode;
-        
+        private int _fragModeIndex;
+
         private void OnEnable()
         {
             _serializedObject = new SerializedObject(this);
+
+            _planeAnchorPos = _planeRot = Vector3.zero;
         }
 
         private void Update()
@@ -31,7 +36,6 @@ namespace SmasherDestruction.Editor
             Repaint(); // 毎フレーム内容が更新されるようにする
         }
 
-        [DrawGizmo(GizmoType.NonSelected)]
         private void OnGUI()
         {
             _serializedObject.Update();
@@ -42,7 +46,9 @@ namespace SmasherDestruction.Editor
 
             if (_serializedObject is not null)
             {
-                EditorGUILayout.PropertyField(_serializedObject.FindProperty($"{nameof(Victim)}"));
+                EditorGUILayout.PropertyField(_serializedObject.FindProperty($"{nameof(VictimObject)}"));
+
+                EditorGUILayout.PropertyField(_serializedObject.FindProperty($"{nameof(PlaneObject)}"));
             }
 
             GUILayout.Label("Fragmentation Mode", SmasherDestructionConstantValues.GetGUIStyle_LabelSmall());
@@ -60,6 +66,33 @@ namespace SmasherDestruction.Editor
                     }))
             {
             }
+
+            GUILayout.Space(10);
+
+            switch (_mode)
+            {
+                case 1:
+                case 2:
+                {
+                    GUILayout.Label($"Fragmentation Mode : {_fragModeIndex}");
+
+                    _fragModeIndex = EditorGUILayout.IntSlider(_fragModeIndex, 0, 5);
+
+                    break;
+                }
+            }
+
+            _planeRot = EditorGUILayout.Vector3Field("PlaneObject Rotation", _planeRot);
+
+            _planeAnchorPos = EditorGUILayout.Vector3Field("PlaneObject Anchor Pos", _planeAnchorPos);
+            
+            if (PlaneObject is not null)
+            {
+                PlaneObject.position = _planeAnchorPos;
+                PlaneObject.rotation = Quaternion.Euler(_planeRot);
+            }
+
+            GUILayout.Space(10);
 
             if (GUILayout.Button("Save Mesh"))
             {

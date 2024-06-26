@@ -10,6 +10,7 @@ namespace SmasherDestruction.Editor
         {
             var gui = new GUIStyle();
             gui.fontSize = SmasherLabelFontSize;
+            gui.fontStyle = FontStyle.Bold;
             gui.alignment = TextAnchor.MiddleCenter;
 
             return gui;
@@ -19,6 +20,7 @@ namespace SmasherDestruction.Editor
         {
             var gui = new GUIStyle();
             gui.fontSize = 24;
+            gui.fontStyle = FontStyle.Bold;
             gui.alignment = TextAnchor.MiddleCenter;
             return gui;
         }
