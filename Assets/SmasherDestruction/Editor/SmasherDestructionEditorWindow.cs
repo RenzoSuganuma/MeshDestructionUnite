@@ -4,12 +4,6 @@ using System.IO;
 using SmasherDestruction.Core;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.Serialization;
-using UnityEngine.UIElements;
-
-#region MEMO
-
-#endregion
 
 namespace SmasherDestruction.Editor
 {
@@ -30,8 +24,8 @@ namespace SmasherDestruction.Editor
         private Vector3 _planeRot;
         private string _meshName;
         private bool _makeGap;
-        private int _mode;
         private int _fragModeIndex;
+        private int _mode;
 
         private void OnEnable()
         {
