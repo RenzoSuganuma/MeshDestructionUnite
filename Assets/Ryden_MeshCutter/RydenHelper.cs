@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEngine;
 
 /// <summary> Rydenクラスを簡単に利用するためのヘルパークラス </summary>
-public static class RydenHelper_Proto
+public static class RydenHelper
 {
     /// <summary> 要素の重複を許さないでリストにリストを追加する </summary>
     /// <param name="targetList"></param>
@@ -37,7 +37,7 @@ public static class RydenHelper_Proto
         {
             foreach (var mesh in cuttedMeshes)
             {
-                var result = Ryden_Proto.CutMesh(mesh, anchorPos, planeNormal, capMaterial, makeGap);
+                var result = Ryden.CutMesh(mesh, anchorPos, planeNormal, capMaterial, makeGap);
                 AddCuttedListToList(results, result.ToList());
             }
 
@@ -46,7 +46,7 @@ public static class RydenHelper_Proto
         else // まだ切られてない場合
         {
             cuttedMeshes.Clear();
-            var result = Ryden_Proto.CutMesh(victim, anchorPos, planeNormal, capMaterial, makeGap);
+            var result = Ryden.CutMesh(victim, anchorPos, planeNormal, capMaterial, makeGap);
             AddCuttedListToList(cuttedMeshes, result.ToList());
         }
     }

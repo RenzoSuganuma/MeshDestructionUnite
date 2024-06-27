@@ -3,7 +3,7 @@ using UnityEngine;
 
 /// <summary> メッシュ切断機能を提供する。MGS のライデンに由来。 </summary>
 // Ver 1.0.0
-public static class Ryden_Proto
+public static class Ryden
 {
     private static CuttedMesh _leftCuttedMesh = new CuttedMesh();
     private static CuttedMesh _rightCuttedMesh = new CuttedMesh();
@@ -27,7 +27,7 @@ public static class Ryden_Proto
             victim.transform.InverseTransformPoint(anchorPos)
         );
 
-        _victimMesh = victim.GetComponent<MeshFilter>().mesh;
+        _victimMesh = victim.GetComponent<MeshFilter>().sharedMesh;
         // 左右に分離したメッシュデータ、新しく追加した頂点群をクリア
         _newVertices.Clear();
         _leftCuttedMesh.ClearAll();

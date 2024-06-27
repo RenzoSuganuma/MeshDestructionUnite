@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class RydenUser_Proto : MonoBehaviour
+public class RydenUser_RunTime : MonoBehaviour
 {
     [SerializeField] private float _rotateSpeed;
     [SerializeField] private Material _capMaterial;
@@ -38,7 +38,7 @@ public class RydenUser_Proto : MonoBehaviour
     {
         if (GUI.Button(new Rect(10, 700, 100, 50), "CUT"))
         {
-            RydenHelper_Proto.CutTheMesh(_victimObject, _cuttedMeshes, Vector3.zero, _planeNormal, _capMaterial);
+            RydenHelper.CutTheMesh(_victimObject, _cuttedMeshes, Vector3.zero, _planeNormal, _capMaterial);
         }
     }
 }
