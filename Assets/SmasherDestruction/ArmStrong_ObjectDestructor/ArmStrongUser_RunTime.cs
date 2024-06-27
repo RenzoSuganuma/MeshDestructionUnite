@@ -6,6 +6,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.Serialization;
 using Random = System.Random;
+using SmasherDestruction.Editor;
 
 /// <summary> これがアタッチされているオブジェクトをヒエラルキーに投げる。 </summary>
 public class ArmStrongUser_RunTime : MonoBehaviour

@@ -60,12 +60,45 @@ namespace SmasherDestruction.Editor
                 EditorGUILayout.PropertyField(_serializedObject.FindProperty($"{nameof(CapMaterial)}"));
             }
 
+            // 破壊対象あるなら描写する
+            if (_serializedObject.FindProperty($"{nameof(VictimObject)}").objectReferenceValue is not null)
+            {
+                Draw();
+            }
+            else
+            {
+                EditorGUILayout.TextArea("Attach The Destruction Target",
+                    SmasherDestructionConstantValues.GetGUIStyle_LabelSmall());
+            }
+            
+            // ウィンドウを閉じる ボタン
+            if (GUILayout.Button("Close Window"))
+            {
+                _planeRot = _planeAnchorPos = Vector3.zero;
+                PlaneObject.transform.position = _planeAnchorPos;
+                PlaneObject.transform.rotation = Quaternion.Euler(_planeRot);
+
+                _serializedObject.Dispose();
+                _serializedObject = null;
+                _ = _serializedObject;
+                Close();
+            }
+
+            if (_serializedObject is not null)
+            {
+                _serializedObject.ApplyModifiedProperties();
+            }
+        }
+
+        private void Draw()
+        {
             // フラグモード ラベル
             GUILayout.Label("Fragmentation Mode", SmasherDestructionConstantValues.GetGUIStyle_LabelSmall());
 
             // 編集モード を 選ぶ
             _mode = GUILayout.Toolbar(_mode,
-                new GUIContent[3] { new GUIContent("Ryden"), new GUIContent("ArmStrong"), new GUIContent("Smasher") });
+                new GUIContent[3]
+                    { new GUIContent("Ryden"), new GUIContent("ArmStrong"), new GUIContent("Smasher") });
 
             // 隙間を つくるか
             _makeGap = EditorGUILayout.Toggle("Make Gap", _makeGap);
@@ -84,8 +117,6 @@ namespace SmasherDestruction.Editor
                         _ => ""
                     }))
             {
-                _cuttedMeshes = new List<GameObject>();
-
                 switch (_mode)
                 {
                     case 0:
@@ -160,24 +191,6 @@ namespace SmasherDestruction.Editor
             }
 
             GUILayout.Space(10);
-
-            // ウィンドウを閉じる ボタン
-            if (GUILayout.Button("Close Window"))
-            {
-                _planeRot = _planeAnchorPos = Vector3.zero;
-                PlaneObject.transform.position = _planeAnchorPos;
-                PlaneObject.transform.rotation = Quaternion.Euler(_planeRot);
-
-                _serializedObject.Dispose();
-                _serializedObject = null;
-                _ = _serializedObject;
-                Close();
-            }
-
-            if (_serializedObject is not null)
-            {
-                _serializedObject.ApplyModifiedProperties();
-            }
         }
 
         private void CheckDirectory()
