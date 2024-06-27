@@ -8,7 +8,7 @@ using UnityEngine.Serialization;
 using Random = System.Random;
 
 /// <summary> これがアタッチされているオブジェクトをヒエラルキーに投げる。 </summary>
-public class ArmStrongUser : MonoBehaviour
+public class ArmStrongUser_Proto : MonoBehaviour
 {
     public enum FragmentationMode
     {
@@ -35,15 +35,15 @@ public class ArmStrongUser : MonoBehaviour
 
     public void CheckDirectory() // 保存パスが存在するか確認する
     {
-        ArmStrong.FindSaveTargetDirectory(ArmStrong.CuttedMeshesFolderAbsolutePath + $"{_objectName}/");
-        ArmStrong.FindSaveTargetDirectory(ArmStrong.CuttedMeshesPrefabFolderAbsolutePath);
+        ArmStrong_Proto.FindSaveTargetDirectory(ArmStrong_Proto.CuttedMeshesFolderAbsolutePath + $"{_objectName}/");
+        ArmStrong_Proto.FindSaveTargetDirectory(ArmStrong_Proto.CuttedMeshesPrefabFolderAbsolutePath);
     }
 
     public void CutMesh() // メッシュのカットを実施する
     {
         if (_victimObject is null) return;
 
-        ArmStrongHelper.CutTheMesh(_victimObject, _cuttedMeshes, _planeObject.transform.position,
+        ArmStrongHelper_Proto.CutTheMesh(_victimObject, _cuttedMeshes, _planeObject.transform.position,
             _planeObject.transform.up,
             _capMaterial, _makeGap);
     }
@@ -176,8 +176,8 @@ public class ArmStrongUser : MonoBehaviour
     {
         if (_cuttedMeshes.Count < 1) return;
 
-        ArmStrong.FindSaveTargetDirectory(ArmStrong.CuttedMeshesFolderAbsolutePath + $"{_objectName}/");
-        ArmStrong.FindSaveTargetDirectory(ArmStrong.CuttedMeshesPrefabFolderAbsolutePath);
+        ArmStrong_Proto.FindSaveTargetDirectory(ArmStrong_Proto.CuttedMeshesFolderAbsolutePath + $"{_objectName}/");
+        ArmStrong_Proto.FindSaveTargetDirectory(ArmStrong_Proto.CuttedMeshesPrefabFolderAbsolutePath);
 
         _cuttedMeshes[0].name = _objectName;
 
@@ -205,11 +205,11 @@ public class ArmStrongUser : MonoBehaviour
             var mesh = _cuttedMeshes[i].GetComponent<MeshFilter>().mesh;
 
             AssetDatabase.CreateAsset(mesh,
-                ArmStrong.CuttedMeshesFolderAbsolutePath + $"{_objectName}/{mesh.name}_{i}.asset");
+                ArmStrong_Proto.CuttedMeshesFolderAbsolutePath + $"{_objectName}/{mesh.name}_{i}.asset");
         }
 
         PrefabUtility.SaveAsPrefabAsset(_cuttedMeshes[0],
-            ArmStrong.CuttedMeshesPrefabFolderAbsolutePath + $"{_objectName}.prefab");
+            ArmStrong_Proto.CuttedMeshesPrefabFolderAbsolutePath + $"{_objectName}.prefab");
     }
 
     private void Start()

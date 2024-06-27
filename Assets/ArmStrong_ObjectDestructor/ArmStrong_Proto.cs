@@ -7,7 +7,7 @@ using UnityEngine;
 
 /// <summary> 被破壊メッシュを生成する機能を提供する </summary>
 // Ver 1.0.0
-public static class ArmStrong
+public static class ArmStrong_Proto
 {
     public static string CuttedMeshesFolderAbsolutePath = "Assets/Resources/ArmStrong/CuttedMeshes/";
     public static string CuttedMeshesPrefabFolderAbsolutePath = "Assets/Resources/ArmStrong/Prefabs/";
@@ -37,7 +37,7 @@ public static class ArmStrong
         {
             foreach (var mesh in cuttedMeshes)
             {
-                var result = Ryden.CutMesh(mesh, anchorPos, planeNormal, capMaterial, false);
+                var result = Ryden_Proto.CutMesh(mesh, anchorPos, planeNormal, capMaterial, false);
                 AddCuttedListToList(results, result.ToList());
             }
 
@@ -46,7 +46,7 @@ public static class ArmStrong
         else // まだ切られてない場合
         {
             cuttedMeshes.Clear();
-            var result = Ryden.CutMesh(victim, anchorPos, planeNormal, capMaterial, false);
+            var result = Ryden_Proto.CutMesh(victim, anchorPos, planeNormal, capMaterial, false);
             AddCuttedListToList(cuttedMeshes, result.ToList());
         }
     }

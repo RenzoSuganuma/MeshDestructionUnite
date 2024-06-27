@@ -3,7 +3,7 @@ using UnityEngine;
 
 /// <summary> メッシュ切断機能を提供する。MGS のライデンに由来。 </summary>
 // Ver 1.0.0
-public static class Ryden
+public static class Ryden_Proto
 {
     private static CuttedMesh _leftCuttedMesh = new CuttedMesh();
     private static CuttedMesh _rightCuttedMesh = new CuttedMesh();

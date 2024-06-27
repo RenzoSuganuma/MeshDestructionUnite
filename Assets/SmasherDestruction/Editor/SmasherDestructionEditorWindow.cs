@@ -8,9 +8,6 @@ using UnityEngine.UIElements;
 
 #region MEMO
 
-// アセット欄のデータを取得する方法
-// https://note.com/ig_k/n/n907516bc958e
-
 #endregion
 
 namespace SmasherDestruction.Editor
@@ -20,11 +17,12 @@ namespace SmasherDestruction.Editor
         public GameObject VictimObject;
         public Transform PlaneObject;
 
-        private string _meshName;
         private List<GameObject> _cuttedMeshes = new List<GameObject>();
         private SerializedObject _serializedObject;
-        private Vector3 _planeAnchorPos, _planeRot;
         private Material _capMaterial;
+        private Vector3 _planeAnchorPos;
+        private Vector3 _planeRot;
+        private string _meshName;
         private int _mode;
         private int _fragModeIndex;
 
@@ -33,8 +31,6 @@ namespace SmasherDestruction.Editor
             _serializedObject = new SerializedObject(this);
 
             _planeAnchorPos = _planeRot = Vector3.zero;
-
-            _capMaterial = VictimObject.GetComponent<Material>();
         }
 
         private void Update()
@@ -79,8 +75,7 @@ namespace SmasherDestruction.Editor
                 {
                     case 0:
                     {
-                        RydenHelper.CutTheMesh(VictimObject, _cuttedMeshes, _planeAnchorPos, PlaneObject.up,
-                            _capMaterial);
+                        _capMaterial = VictimObject.GetComponent<Material>();
                         break;
                     }
                     case 1:
@@ -122,17 +117,10 @@ namespace SmasherDestruction.Editor
                 _planeAnchorPos = Vector3.zero;
             }
 
-            if (PlaneObject is not null)
-            {
-                PlaneObject.position = _planeAnchorPos;
-                PlaneObject.rotation = Quaternion.Euler(_planeRot);
-            }
-
             GUILayout.Space(10);
 
             if (GUILayout.Button("Save Mesh"))
             {
-                SaveMesh();
             }
 
             if (GUILayout.Button("Close"))
@@ -147,43 +135,6 @@ namespace SmasherDestruction.Editor
             {
                 _serializedObject.ApplyModifiedProperties();
             }
-        }
-
-        private void SaveMesh()
-        {
-            if (_cuttedMeshes.Count < 1) return;
-
-            ArmStrong.FindSaveTargetDirectory(ArmStrong.CuttedMeshesFolderAbsolutePath + $"{_meshName}/");
-            ArmStrong.FindSaveTargetDirectory(ArmStrong.CuttedMeshesPrefabFolderAbsolutePath);
-
-            _cuttedMeshes[0].name = _meshName;
-
-            // コンポーネントのアタッチ
-            foreach (var cuttedMesh in _cuttedMeshes)
-            {
-                cuttedMesh.AddComponent<MeshCollider>();
-                cuttedMesh.GetComponent<MeshCollider>().sharedMesh = cuttedMesh.GetComponent<MeshFilter>().mesh;
-                cuttedMesh.GetComponent<MeshCollider>().convex = true;
-                cuttedMesh.AddComponent<Rigidbody>();
-            }
-
-            // カットしたメッシュは一つのオブジェクトにする
-            for (int i = 1; i < _cuttedMeshes.Count; ++i)
-            {
-                _cuttedMeshes[i].transform.parent = _cuttedMeshes[0].transform;
-            }
-
-            // 保存処理
-            for (int i = 0; i < _cuttedMeshes.Count; ++i)
-            {
-                var mesh = _cuttedMeshes[i].GetComponent<MeshFilter>().mesh;
-
-                AssetDatabase.CreateAsset(mesh,
-                    ArmStrong.CuttedMeshesFolderAbsolutePath + $"{_meshName}/{mesh.name}_{i}.asset");
-            }
-
-            PrefabUtility.SaveAsPrefabAsset(_cuttedMeshes[0],
-                ArmStrong.CuttedMeshesPrefabFolderAbsolutePath + $"{_meshName}.prefab");
         }
     }
 }

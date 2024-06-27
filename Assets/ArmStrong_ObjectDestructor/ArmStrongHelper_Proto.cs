@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEngine;
 
 /// <summary> Machomanクラスの窓口 </summary>
-public static class ArmStrongHelper
+public static class ArmStrongHelper_Proto
 {
     /// <summary> 要素の重複を許さないでリストにリストを追加する </summary>
     /// <param name="targetList"></param>
@@ -36,7 +36,7 @@ public static class ArmStrongHelper
         {
             foreach (var mesh in cuttedMeshes)
             {
-                var result = Ryden.CutMesh(mesh, anchorPos, planeNormal, capMaterial, makeGap);
+                var result = Ryden_Proto.CutMesh(mesh, anchorPos, planeNormal, capMaterial, makeGap);
                 AddCuttedListToList(results, result.ToList());
             }
 
@@ -45,7 +45,7 @@ public static class ArmStrongHelper
         else // まだ切られてない場合
         {
             cuttedMeshes.Clear();
-            var result = Ryden.CutMesh(victim, anchorPos, planeNormal, capMaterial, makeGap);
+            var result = Ryden_Proto.CutMesh(victim, anchorPos, planeNormal, capMaterial, makeGap);
             AddCuttedListToList(cuttedMeshes, result.ToList());
         }
     }
