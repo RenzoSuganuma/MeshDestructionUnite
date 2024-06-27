@@ -9,8 +9,8 @@ using UnityEngine;
 // Ver 1.0.0
 public static class ArmStrong
 {
-    public static string CuttedMeshesFolderAbsolutePath = "Assets/Resources/Machoman/CuttedMeshes/";
-    public static string CuttedMeshesPrefabFolderAbsolutePath = "Assets/Resources/Machoman/Prefabs/";
+    public static string CuttedMeshesFolderAbsolutePath = "Assets/Resources/SmasherDestruction/CuttedMeshes/";
+    public static string CuttedMeshesPrefabFolderAbsolutePath = "Assets/Resources/SmasherDestruction/Prefabs/";
     
     public static void FindSaveTargetDirectory(string filePath)
     {

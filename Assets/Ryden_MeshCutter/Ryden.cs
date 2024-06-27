@@ -27,7 +27,7 @@ public static class Ryden
             victim.transform.InverseTransformPoint(anchorPos)
         );
 
-        _victimMesh = victim.GetComponent<MeshFilter>().mesh;
+        _victimMesh = victim.GetComponent<MeshFilter>().sharedMesh;
         // 左右に分離したメッシュデータ、新しく追加した頂点群をクリア
         _newVertices.Clear();
         _leftCuttedMesh.ClearAll();

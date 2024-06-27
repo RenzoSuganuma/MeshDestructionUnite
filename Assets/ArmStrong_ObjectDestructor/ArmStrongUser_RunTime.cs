@@ -8,7 +8,7 @@ using UnityEngine.Serialization;
 using Random = System.Random;
 
 /// <summary> これがアタッチされているオブジェクトをヒエラルキーに投げる。 </summary>
-public class ArmStrongUser : MonoBehaviour
+public class ArmStrongUser_RunTime : MonoBehaviour
 {
     public enum FragmentationMode
     {
@@ -109,7 +109,7 @@ public class ArmStrongUser : MonoBehaviour
         _planeObject.transform.up = new Vector3(-.5f, 0, 1);
         CutMesh();
     }
-
+    
     private void Frag_1()
     {
         var r = _random.Next(0, 256);

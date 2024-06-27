@@ -2,33 +2,33 @@ using UnityEditor;
 using UnityEngine;
 
 /// <summary> MachomanUserのインスペクタを拡張する。ボタンの追加をする </summary>
-[CustomEditor(typeof(ArmStrongUser))]
+[CustomEditor(typeof(ArmStrongUser_RunTime))]
 public class ArmStrongEditor : Editor // MachoManクラスを拡張する
 {
     public override void OnInspectorGUI()
     {
         base.OnInspectorGUI();
 
-        ArmStrongUser user = target as ArmStrongUser;
+        ArmStrongUser_RunTime userRunTime = target as ArmStrongUser_RunTime;
 
         if (GUILayout.Button("Cut"))
         {
-            user.CutMesh();
+            userRunTime.CutMesh();
         }
         
         if (GUILayout.Button("Cut Randomly"))
         {
-            user.CutRandomly();
+            userRunTime.CutRandomly();
         }
 
         if (GUILayout.Button("Check Directory"))
         {
-            user.CheckDirectory();
+            userRunTime.CheckDirectory();
         }
 
         if (GUILayout.Button("Save Meshes"))
         {
-            user.SaveCuttedMeshes();
+            userRunTime.SaveCuttedMeshes();
         }
     }
 }
