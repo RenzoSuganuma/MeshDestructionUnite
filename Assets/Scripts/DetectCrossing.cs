@@ -2,20 +2,30 @@ using UnityEngine;
 
 public class DetectCrossing : MonoBehaviour
 {
-    [SerializeField] private Transform _p;
-    [SerializeField] private Transform _q;
-    [SerializeField] private Transform _a;
-    [SerializeField] private Transform _b;
-    
-    void Update()
+    /// <summary> ２つの線分【正規化されていないベクトル】が交差しているか判定する </summary>
+    /// <param name="p"></param>
+    /// <param name="q"></param>
+    /// <param name="a"></param>
+    /// <param name="b"></param>
+    /// <returns></returns>
+    public bool IsCrossing
+    (
+        Vector3 p,
+        Vector3 q,
+        Vector3 a,
+        Vector3 b
+    )
     {
-        var pq = _q.position - _p.position;
-        var pa = _a.position - _p.position;
-        var pb = _b.position - _p.position;
-        var ab = _b.position - _a.position;
-        var ap = _p.position - _a.position;
-        var aq = _q.position - _a.position;
-        
-        Debug.Log($"{Vector3.Cross(pa , pq).y}");
+        var pq = q - p;
+        var pa = a - p;
+        var pb = b - p;
+        var ab = b - a;
+        var ap = p - a;
+        var aq = q - a;
+
+        var crossing = (Vector3.Cross(pq, pb).y * Vector3.Cross(pq, pa).y < 0) &&
+                       (Vector3.Cross(ab, ap).y * Vector3.Cross(ab, aq).y < 0);
+
+        return crossing;
     }
 }
