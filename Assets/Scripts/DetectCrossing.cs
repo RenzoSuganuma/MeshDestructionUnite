@@ -1,20 +1,9 @@
 using UnityEngine;
 
-public class DetectCrossing : MonoBehaviour
+public static class DetectCrossing
 {
     /// <summary> ２つの線分【正規化されていないベクトル】が交差しているか判定する </summary>
-    /// <param name="p"></param>
-    /// <param name="q"></param>
-    /// <param name="a"></param>
-    /// <param name="b"></param>
-    /// <returns></returns>
-    public bool IsCrossing
-    (
-        Vector3 p,
-        Vector3 q,
-        Vector3 a,
-        Vector3 b
-    )
+    public static bool IsCrossing(Vector3 p, Vector3 q, Vector3 a, Vector3 b)
     {
         var pq = q - p;
         var pa = a - p;
