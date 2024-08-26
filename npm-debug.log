@@ -1,0 +1,52 @@
+0 info it worked if it ends with ok
+1 verbose cli [ 'C:\\Program Files\\Unity\\Hub\\Editor\\2022.3.9f1\\Editor\\Data\\Tools\\nodejs\\node.exe',
+1 verbose cli   'C:\\Program Files\\Unity\\Hub\\Editor\\2022.3.9f1\\Editor\\Data\\Tools\\nodejs\\node_modules\\npm\\bin\\npm-cli.js',
+1 verbose cli   'view',
+1 verbose cli   'com.unity.ai.navigation',
+1 verbose cli   '--registry',
+1 verbose cli   'https://packages.unity.com/' ]
+2 info using npm@3.10.10
+3 info using node@v6.10.0
+4 silly mapToRegistry name com.unity.ai.navigation
+5 silly mapToRegistry using default registry
+6 silly mapToRegistry registry https://packages.unity.com/
+7 silly mapToRegistry data Result {
+7 silly mapToRegistry   raw: 'com.unity.ai.navigation',
+7 silly mapToRegistry   scope: null,
+7 silly mapToRegistry   escapedName: 'com.unity.ai.navigation',
+7 silly mapToRegistry   name: 'com.unity.ai.navigation',
+7 silly mapToRegistry   rawSpec: '',
+7 silly mapToRegistry   spec: 'latest',
+7 silly mapToRegistry   type: 'tag' }
+8 silly mapToRegistry uri https://packages.unity.com/com.unity.ai.navigation
+9 verbose request uri https://packages.unity.com/com.unity.ai.navigation
+10 verbose request no auth needed
+11 info attempt registry request try #1 at 01:51:35
+12 verbose request id 9d124e8f4e2b56f4
+13 http request GET https://packages.unity.com/com.unity.ai.navigation
+14 info retry will retry, error on last attempt: Error: write EPROTO 101057795:error:04091068:rsa routines:INT_RSA_VERIFY:bad signature:openssl\crypto\rsa\rsa_sign.c:278:
+14 info retry 101057795:error:1408D07B:SSL routines:ssl3_get_key_exchange:bad signature:openssl\ssl\s3_clnt.c:2032:
+15 info attempt registry request try #2 at 01:51:45
+16 http request GET https://packages.unity.com/com.unity.ai.navigation
+17 info retry will retry, error on last attempt: Error: write EPROTO 101057795:error:04091068:rsa routines:INT_RSA_VERIFY:bad signature:openssl\crypto\rsa\rsa_sign.c:278:
+17 info retry 101057795:error:1408D07B:SSL routines:ssl3_get_key_exchange:bad signature:openssl\ssl\s3_clnt.c:2032:
+18 info attempt registry request try #3 at 01:52:45
+19 http request GET https://packages.unity.com/com.unity.ai.navigation
+20 verbose stack Error: write EPROTO 101057795:error:04091068:rsa routines:INT_RSA_VERIFY:bad signature:openssl\crypto\rsa\rsa_sign.c:278:
+20 verbose stack 101057795:error:1408D07B:SSL routines:ssl3_get_key_exchange:bad signature:openssl\ssl\s3_clnt.c:2032:
+20 verbose stack
+20 verbose stack     at exports._errnoException (util.js:1022:11)
+20 verbose stack     at WriteWrap.afterWrite (net.js:801:14)
+21 verbose cwd C:\Users\sugan\UNITYPROJECT\MeshDestruction
+22 error Windows_NT 10.0.22631
+23 error argv "C:\\Program Files\\Unity\\Hub\\Editor\\2022.3.9f1\\Editor\\Data\\Tools\\nodejs\\node.exe" "C:\\Program Files\\Unity\\Hub\\Editor\\2022.3.9f1\\Editor\\Data\\Tools\\nodejs\\node_modules\\npm\\bin\\npm-cli.js" "view" "com.unity.ai.navigation" "--registry" "https://packages.unity.com/"
+24 error node v6.10.0
+25 error npm  v3.10.10
+26 error code EPROTO
+27 error errno EPROTO
+28 error syscall write
+29 error write EPROTO 101057795:error:04091068:rsa routines:INT_RSA_VERIFY:bad signature:openssl\crypto\rsa\rsa_sign.c:278:
+29 error 101057795:error:1408D07B:SSL routines:ssl3_get_key_exchange:bad signature:openssl\ssl\s3_clnt.c:2032:
+30 error If you need help, you may report this error at:
+30 error     <https://github.com/npm/npm/issues>
+31 verbose exit [ 1, true ]
