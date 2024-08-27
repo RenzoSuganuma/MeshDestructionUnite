@@ -56,6 +56,7 @@ public class Voronoi3D
             pnt.y = Random.Range(0, mapY) + 10;
             pnt.z = Random.Range(0, mapZ) + 10;
             var c = new Color(Random.Range(0f, 1.0f), Random.Range(0f, 1.0f), Random.Range(0f, 1.0f));
+            
             _points.Add(pnt);
             _colors.Add(c);
         }
@@ -83,7 +84,7 @@ public class Voronoi3D
                         }
                     }
 
-                    if (ind > -1)
+                    if (ind > -1) // 
                     {
                         var obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
                         obj.transform.position = new Vector3(ww, hh, dd);
