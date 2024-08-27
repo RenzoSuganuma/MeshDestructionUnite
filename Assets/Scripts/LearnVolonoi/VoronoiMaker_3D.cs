@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEditor.PackageManager.Requests;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -31,6 +32,7 @@ public class Voronoi3D
 {
     private List<Point3D> _points = new();
     private List<Color> _colors = new();
+    private List<GameObject> _createdObjs = new();
 
     public void Make(int count)
     {
@@ -38,6 +40,8 @@ public class Voronoi3D
         CreateSites3D();
         SetSitesPoints3D();
     }
+
+    public List<GameObject> CreatedObjs => _createdObjs;
 
     // 点と色を配列へ追加
     void CreatePointAndColor3D(int count)
@@ -84,6 +88,7 @@ public class Voronoi3D
                         var obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
                         obj.transform.position = new Vector3(ww, hh, dd);
                         obj.GetComponent<MeshRenderer>().material.color = _colors[ind];
+                        _createdObjs.Add( obj );
                     }
                 }
             }
@@ -106,6 +111,7 @@ public class Voronoi3D
                         var obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
                         obj.transform.position = new Vector3(x + i, y + j, z + k);
                         obj.GetComponent<MeshRenderer>().material.color = Color.black;
+                        _createdObjs.Add( obj );
                     }
                 }
             }
@@ -124,5 +130,14 @@ public class VoronoiMaker_3D : MonoBehaviour
     private void Start()
     {
         diagram.Make(VoronoiUtil3D.MAP_XYZ);
+    }
+
+    private void OnDisable()
+    {
+        diagram.CreatedObjs.ForEach(o =>
+        {
+            Destroy(o);
+            o = null;
+        });
     }
 }
