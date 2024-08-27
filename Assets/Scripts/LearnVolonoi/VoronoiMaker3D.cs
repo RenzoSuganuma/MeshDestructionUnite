@@ -124,7 +124,7 @@ public class Voronoi3D
 /// <summary>
 /// ボロノイ キューブを生成する
 /// </summary>
-public class VoronoiMaker_3D : MonoBehaviour
+public class VoronoiMaker3D : MonoBehaviour
 {
     private Voronoi3D diagram = new();
 

@@ -31,6 +31,7 @@ public class Voronoi2D
 {
     private List<Point2D> _points = new();
     private List<Color> _colors = new();
+    private List<GameObject> _objects = new();
 
     public void Make(int count)
     {
@@ -38,6 +39,8 @@ public class Voronoi2D
         CreateSites();
         SetSitesPoints();
     }
+
+    public List<GameObject> Obj => _objects;
 
     // 点と色を配列へ追加
     void CreatePointAndColor(int count)
@@ -80,6 +83,7 @@ public class Voronoi2D
                     var obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
                     obj.transform.position = new Vector3(ww, hh, 0);
                     obj.GetComponent<MeshRenderer>().material.color = _colors[ind];
+                    _objects.Add(obj);
                 }
             }
         }
@@ -98,13 +102,14 @@ public class Voronoi2D
                     var obj =  GameObject.CreatePrimitive(PrimitiveType.Cube);
                     obj.transform.position = new Vector3(x + i, y + j, 0);
                     obj.GetComponent<MeshRenderer>().material.color = Color.black;
+                    _objects.Add(obj);
                 }
             }
         }
     }
 }
 
-public class VoronoiMaker_2D : MonoBehaviour
+public class VoronoiMaker2D : MonoBehaviour
 {
     private Voronoi2D v = new Voronoi2D();
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -116,5 +121,14 @@ public class VoronoiMaker_2D : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+    }
+
+    private void OnDisable()
+    {
+        v.Obj.ForEach(o =>
+        {
+            Destroy(o);
+            o = null;
+        });
     }
 }
