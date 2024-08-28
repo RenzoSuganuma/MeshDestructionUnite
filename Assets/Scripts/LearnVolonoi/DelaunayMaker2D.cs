@@ -95,7 +95,7 @@ public sealed class DelaunayTriangulator2D
         return (dsqr <= rsqr);
     }
 
-    public GameObject CreateInfluencePolygon(Vector2[] XZofVertices)
+    public void CreateInfluencePolygon(Vector2[] XZofVertices)
     {
         Vector3[] vertices = new Vector3[XZofVertices.Length];
         for (int i = 0; i < XZofVertices.Length; i++)
@@ -103,16 +103,40 @@ public sealed class DelaunayTriangulator2D
             vertices[i] = new Vector3(XZofVertices[i].x, 0, XZofVertices[i].y);
         }
 
-        GameObject ourNewMesh = new GameObject("OurNewMesh");
-        Mesh mesh = new Mesh();
-        mesh.vertices = vertices;
-        mesh.uv = XZofVertices;
-        mesh.triangles = TriangulatePolygon(XZofVertices);
-        mesh.RecalculateNormals();
-        MeshFilter mf = ourNewMesh.AddComponent<MeshFilter>();
-        ourNewMesh.AddComponent<MeshRenderer>();
-        mf.mesh = mesh;
-        return ourNewMesh;
+        foreach (var v in vertices)
+        {
+            var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            cube.transform.position = v;
+            cube.transform.localScale = Vector3.one * .5f;
+        }
+
+        // ポリゴンとして構成できる頂点インデックス配列を返す。
+        var polygon = TriangulatePolygon(XZofVertices);
+
+        for (int i = 0; i < polygon.Length - 3; i += 3)
+        {
+            GameObject obj1 = new GameObject($"Mesh{i + 1}");
+            GameObject obj2 = new GameObject($"Mesh{i + 2}");
+            GameObject obj3 = new GameObject($"Mesh{i + 3}");
+            var p1 = vertices[polygon[i]];
+            var p2 = vertices[polygon[i + 1]];
+            var p3 = vertices[polygon[i + 2]];
+
+            var lr = obj1.AddComponent<LineRenderer>();
+            lr.startWidth = .5f;
+            lr.endWidth = .5f;
+            lr.SetPositions(new[] { p1, p2 });
+
+            lr = obj2.AddComponent<LineRenderer>();
+            lr.startWidth = .5f;
+            lr.endWidth = .5f;
+            lr.SetPositions(new[] { p2, p3 });
+
+            lr = obj3.AddComponent<LineRenderer>();
+            lr.startWidth = .5f;
+            lr.endWidth = .5f;
+            lr.SetPositions(new[] { p3, p1 });
+        }
     }
 
     public int[] TriangulatePolygon(Vector2[] XZofVertices)
@@ -238,7 +262,7 @@ public sealed class DelaunayTriangulator2D
 public class DelaunayMaker2D : MonoBehaviour
 {
     private DelaunayTriangulator2D _delunayTriangulator = new();
-    private const int WIDTH = 64, HEIGHT = 64;
+    private const int WIDTH = 32, HEIGHT = 32;
 
     Vector2[] MakePoints(int count)
     {
@@ -254,6 +278,6 @@ public class DelaunayMaker2D : MonoBehaviour
 
     private void Start()
     {
-        _delunayTriangulator.CreateInfluencePolygon(MakePoints(32));
+        _delunayTriangulator.CreateInfluencePolygon(MakePoints(8));
     }
 }
