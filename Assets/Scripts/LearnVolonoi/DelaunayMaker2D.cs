@@ -1,6 +1,8 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 // https://gist.github.com/miketucker/3795318
 
@@ -46,7 +48,7 @@ public sealed class DelaunayEdge2D
 
 public sealed class DelaunayTriangulator2D
 {
-    bool TriangulatePolygonSubFuncInCyrcle
+    public bool TriangulatePolygonSubFuncInCyrcle
         (Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4)
     {
         if (Mathf.Abs(p1.y - p2.y) < float.Epsilon
@@ -93,7 +95,7 @@ public sealed class DelaunayTriangulator2D
         return (dsqr <= rsqr);
     }
 
-    GameObject CreateInfluencePolygon(Vector2[] XZofVertices)
+    public GameObject CreateInfluencePolygon(Vector2[] XZofVertices)
     {
         Vector3[] vertices = new Vector3[XZofVertices.Length];
         for (int i = 0; i < XZofVertices.Length; i++)
@@ -113,7 +115,7 @@ public sealed class DelaunayTriangulator2D
         return ourNewMesh;
     }
 
-    int[] TriangulatePolygon(Vector2[] XZofVertices)
+    public int[] TriangulatePolygon(Vector2[] XZofVertices)
     {
         int vertexCount = XZofVertices.Length;
         float xmin = XZofVertices[0].x;
@@ -183,9 +185,50 @@ public sealed class DelaunayTriangulator2D
             {
                 continue;
             }
+
+            for (int j = edges.Count - 2; j >= 0; j--)
+            {
+                for (int k = edges.Count - 1; k >= j + 1; k--)
+                {
+                    if (edges[j].Equals(edges[k]))
+                    {
+                        edges.RemoveAt(k);
+                        edges.RemoveAt(j);
+                        k--;
+                        continue;
+                    }
+                }
+            }
+
+            for (int j = 0; j < edges.Count; j++)
+            {
+                triangleList.Add(new DelaunayTriangle2D(edges[j].p1, edges[j].p2, i));
+            }
+
+            edges.Clear();
+            edges = null;
         }
 
-        return new int[] { 0 };
+        for (int i = triangleList.Count - 1; i >= 0; i--)
+        {
+            if (triangleList[i].p1 >= vertexCount
+                || triangleList[i].p2 >= vertexCount
+                || triangleList[i].p3 >= vertexCount)
+            {
+                triangleList.RemoveAt(i);
+            }
+        }
+
+        triangleList.TrimExcess();
+        int[] triangles = new int[3 * triangleList.Count];
+        for (int i = 0; i < triangleList.Count; i++)
+        {
+            triangles[3 * i] = triangleList[i].p1;
+            triangles[3 * i + 1] = triangleList[i].p2;
+            triangles[3 * i + 2] = triangleList[i].p3;
+        }
+
+        return triangles;
     }
 }
 
@@ -194,4 +237,23 @@ public sealed class DelaunayTriangulator2D
 /// </summary>
 public class DelaunayMaker2D : MonoBehaviour
 {
+    private DelaunayTriangulator2D _delunayTriangulator = new();
+    private const int WIDTH = 64, HEIGHT = 64;
+
+    Vector2[] MakePoints(int count)
+    {
+        var arr = new Vector2[count];
+        for (int i = 0; i < count; i++)
+        {
+            var v = new Vector2(Random.Range(.0f, WIDTH), Random.Range(.0f, HEIGHT));
+            arr[i] = v;
+        }
+
+        return arr;
+    }
+
+    private void Start()
+    {
+        _delunayTriangulator.CreateInfluencePolygon(MakePoints(32));
+    }
 }
