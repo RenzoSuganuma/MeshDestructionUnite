@@ -1,19 +1,17 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-// https://gist.github.com/miketucker/3795318
-
 /// <summary>
 /// ドロネー三角形
 /// </summary>
-public struct DelaunayTriangle2D
+public struct DelaunayTriangle3D
 {
     public int p1, p2, p3;
 
-    public DelaunayTriangle2D(int p1, int p2, int p3)
+    public DelaunayTriangle3D(int p1, int p2, int p3)
     {
         this.p1 = p1;
         this.p2 = p2;
@@ -24,21 +22,21 @@ public struct DelaunayTriangle2D
 /// <summary>
 /// ドロネー辺
 /// </summary>
-public sealed class DelaunayEdge2D
+public sealed class DelaunayEdge3D
 {
     public int p1, p2;
 
-    public DelaunayEdge2D() : this(0, 0)
+    public DelaunayEdge3D() : this(0, 0)
     {
     }
 
-    public DelaunayEdge2D(int p1, int p2)
+    public DelaunayEdge3D(int p1, int p2)
     {
         this.p1 = p1;
         this.p2 = p2;
     }
 
-    public bool Equals(DelaunayEdge2D other)
+    public bool Equals(DelaunayEdge3D other)
     {
         bool res = ((this.p1 == other.p1) && (this.p2 == other.p2)
                     || (this.p1 == other.p2) && (this.p2 == other.p1));
@@ -46,26 +44,41 @@ public sealed class DelaunayEdge2D
     }
 }
 
-public sealed class DelaunayTriangulator2D
+
+/// <summary>
+/// ドロネー三角形を構成
+/// </summary>
+public sealed class DelaunayTriangulator3D
 {
+    /// <summary>
+    /// 円上の頂点で三角形を構成する
+    /// </summary>
+    ///
+    /// おそらく 「円周角の定理(共円条件)の逆」を利用している
     public bool TriangulatePolygonSubFuncInCyrcle
         (Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4)
     {
+        // 渡された三角形を構成する辺のうち２つの長さが0に近いときは三角形が構成できない
         if (Mathf.Abs(p1.y - p2.y) < float.Epsilon
             && Mathf.Abs(p2.y - p3.y) < float.Epsilon)
         {
             return false;
         }
 
+        // m = magnitude ? 
+        // m2 = 辺2:右上
+        // m1 = 辺1:左上
         float m1, m2, mx1, mx2, my1, my2, xc, yc;
+
+        // 三角形のうち１つの辺の長さが0なら:P1
         if (Mathf.Abs(p2.y - p1.y) < float.Epsilon)
         {
-            m2 = -(p3.x - p2.x) / (p3.y - p3.y);
+            m2 = -(p3.x - p2.x) / (p3.y - p2.y);
             mx2 = (p2.x + p3.x) * .5f;
             my2 = (p2.y + p3.y) * .5f;
             xc = (p2.x + p1.x) * .5f;
             yc = m2 * (xc - mx2) + my2;
-        }
+        } // :P2
         else if (Mathf.Abs(p3.y - p2.y) < float.Epsilon)
         {
             m1 = -(p2.x - p1.x) / (p2.y - p1.y);
@@ -73,7 +86,7 @@ public sealed class DelaunayTriangulator2D
             my1 = (p1.y + p2.y) * .5f;
             xc = (p3.x + p2.x) * .5f;
             yc = m1 * (xc - mx1) + my1;
-        }
+        } // どの編も長さがあるなら
         else
         {
             m1 = -(p2.x - p1.x) / (p2.y - p1.y);
@@ -123,18 +136,19 @@ public sealed class DelaunayTriangulator2D
             var p3 = vertices[polygon[i + 2]];
 
             var lr = obj1.AddComponent<LineRenderer>();
-            lr.startWidth = .5f;
-            lr.endWidth = .5f;
+            float w = .1f;
+            lr.startWidth = w;
+            lr.endWidth = w;
             lr.SetPositions(new[] { p1, p2 });
 
             lr = obj2.AddComponent<LineRenderer>();
-            lr.startWidth = .5f;
-            lr.endWidth = .5f;
+            lr.startWidth = w;
+            lr.endWidth = w;
             lr.SetPositions(new[] { p2, p3 });
 
             lr = obj3.AddComponent<LineRenderer>();
-            lr.startWidth = .5f;
-            lr.endWidth = .5f;
+            lr.startWidth = w;
+            lr.endWidth = w;
             lr.SetPositions(new[] { p3, p1 });
         }
     }
@@ -181,12 +195,12 @@ public sealed class DelaunayTriangulator2D
         expandedXZ[vertexCount] = new Vector2((xmid - 2 * dmax), (ymid - dmax));
         expandedXZ[vertexCount + 1] = new Vector2(xmid, (ymid + 2 * dmax));
         expandedXZ[vertexCount + 2] = new Vector2((xmid + 2 * dmax), (ymid - dmax));
-        List<DelaunayTriangle2D> triangleList = new List<DelaunayTriangle2D>();
+        List<DelaunayTriangle3D> triangleList = new List<DelaunayTriangle3D>();
         triangleList.Add(
-            new DelaunayTriangle2D(vertexCount, vertexCount + 1, vertexCount + 2));
+            new DelaunayTriangle3D(vertexCount, vertexCount + 1, vertexCount + 2));
         for (int i = 0; i < vertexCount; i++)
         {
-            List<DelaunayEdge2D> edges = new();
+            List<DelaunayEdge3D> edges = new();
             for (int j = 0; j < triangleList.Count; j++)
             {
                 if (TriangulatePolygonSubFuncInCyrcle
@@ -197,9 +211,9 @@ public sealed class DelaunayTriangulator2D
                         expandedXZ[triangleList[j].p3]
                     ))
                 {
-                    edges.Add(new DelaunayEdge2D(triangleList[j].p1, triangleList[j].p2));
-                    edges.Add(new DelaunayEdge2D(triangleList[j].p2, triangleList[j].p3));
-                    edges.Add(new DelaunayEdge2D(triangleList[j].p3, triangleList[j].p1));
+                    edges.Add(new DelaunayEdge3D(triangleList[j].p1, triangleList[j].p2));
+                    edges.Add(new DelaunayEdge3D(triangleList[j].p2, triangleList[j].p3));
+                    edges.Add(new DelaunayEdge3D(triangleList[j].p3, triangleList[j].p1));
                     triangleList.RemoveAt(j);
                     j--;
                 }
@@ -226,7 +240,7 @@ public sealed class DelaunayTriangulator2D
 
             for (int j = 0; j < edges.Count; j++)
             {
-                triangleList.Add(new DelaunayTriangle2D(edges[j].p1, edges[j].p2, i));
+                triangleList.Add(new DelaunayTriangle3D(edges[j].p1, edges[j].p2, i));
             }
 
             edges.Clear();
@@ -256,22 +270,16 @@ public sealed class DelaunayTriangulator2D
     }
 }
 
-/// <summary>
-/// ドロネー三角形分割の機能を提供する
-/// </summary>
-public class DelaunayMaker2D : MonoBehaviour
+public class DelaunayMaker3D : MonoBehaviour
 {
-    [SerializeField] private List<Transform> _transforms;
-    
-    private DelaunayTriangulator2D _delunayTriangulator = new();
-    private const int WIDTH = 32, HEIGHT = 32;
+    private DelaunayTriangulator3D _d = new();
 
     Vector2[] MakePoints(int count)
     {
         var arr = new Vector2[count];
         for (int i = 0; i < count; i++)
         {
-            var v = new Vector2(Random.Range(.0f, WIDTH), Random.Range(.0f, HEIGHT));
+            var v = new Vector2(Random.Range(.0f, 32), Random.Range(.0f, 32));
             arr[i] = v;
         }
 
@@ -280,6 +288,6 @@ public class DelaunayMaker2D : MonoBehaviour
 
     private void Start()
     {
-        _delunayTriangulator.CreateInfluencePolygon(MakePoints(16));
+        _d.CreateInfluencePolygon(MakePoints(9));
     }
 }
