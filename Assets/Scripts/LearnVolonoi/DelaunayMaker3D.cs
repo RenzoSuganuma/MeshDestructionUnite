@@ -65,7 +65,7 @@ public sealed class DelaunayTriangulator3D
             return false;
         }
 
-        // m1 , m2 = 傾き
+        // m1 , m2 = 垂直二等分線の傾き
         // mx1,mx2,my1,mx2 = 中点
         // xc,yc = 外周円の中点
         float m1, m2, mx1, mx2, my1, my2, xc, yc;
@@ -73,7 +73,7 @@ public sealed class DelaunayTriangulator3D
         // 三角形のうち１つの辺の長さが0なら:P1
         if (Mathf.Abs(p2.y - p1.y) < float.Epsilon)
         {
-            m2 = -(p3.x - p2.x) / (p3.y - p2.y);
+            m2 = -(p3.x - p2.x) / (p3.y - p2.y); // 垂直二等分線の傾き = -1 * 辺の傾き
             mx2 = (p2.x + p3.x) * .5f;
             my2 = (p2.y + p3.y) * .5f;
             xc = (p2.x + p1.x) * .5f;
@@ -89,12 +89,23 @@ public sealed class DelaunayTriangulator3D
         } // どの編も長さがあるなら
         else
         {
+            // 垂直二等分線の傾き = -1 * 辺の傾き
             m1 = -(p2.x - p1.x) / (p2.y - p1.y);
             m2 = -(p3.x - p2.x) / (p3.y - p1.y);
+            // 辺の中点を求めている
             mx1 = (p1.x + p2.x) * .5f;
             mx2 = (p2.x + p3.x) * .5f;
             my1 = (p1.y + p2.y) * .5f;
             my2 = (p2.y + p3.y) * .5f;
+            // NOTE:
+            // 垂直二等分線の方程式
+            // [ y = ax + b ] より、
+            //  [ y = m1(x - mx1) + my1 ] [ y = m2(x - mx2) + my2 ]
+            // ２式を連立させると
+            // m1(x - mx1) + my1 = m2(x - mx2) + my2 
+            // これをxについて解くと、
+            // x = m1 * mx1 - m2 * mx2 - my2 - my1 / m1 - m2
+            // x = xc [ xc = 円の中心のx座標 ]
             xc = (m1 * mx1 - m2 * mx2 - my2 - my1) / (m1 - m2);
             yc = m1 * (xc - mx1) + my1;
         }
