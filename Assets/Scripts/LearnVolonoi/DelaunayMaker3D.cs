@@ -65,9 +65,9 @@ public sealed class DelaunayTriangulator3D
             return false;
         }
 
-        // m = magnitude ? 
-        // m2 = 辺2:右上
-        // m1 = 辺1:左上
+        // m1 , m2 = 傾き
+        // mx1,mx2,my1,mx2 = 中点
+        // xc,yc = 外周円の中点
         float m1, m2, mx1, mx2, my1, my2, xc, yc;
 
         // 三角形のうち１つの辺の長さが0なら:P1
