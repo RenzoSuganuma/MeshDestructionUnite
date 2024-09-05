@@ -3,9 +3,9 @@ using UnityEngine;
 
 namespace SmasherDestruction.Editor
 {
-    /// <summary> メッシュ切断機能を提供する。MGS のライデンに由来。 </summary>
-// Ver 1.0.0
-    public static class Ryden
+    /// <summary> メッシュ切断機能を提供する。 </summary>
+    // Ver 1.0.0
+    public static class Tsujigiri
     {
         private static CuttedMesh _leftCuttedMesh = new CuttedMesh();
         private static CuttedMesh _rightCuttedMesh = new CuttedMesh();

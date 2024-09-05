@@ -5,8 +5,8 @@ using UnityEngine;
 
 namespace SmasherDestruction.Editor
 {
-    /// <summary> Rydenクラスを簡単に利用するためのヘルパークラス </summary>
-    public static class RydenHelper
+    /// <summary> 辻斬りクラスを簡単に利用するためのヘルパークラス </summary>
+    public static class TsujigiriUtility
     {
         /// <summary> 要素の重複を許さないでリストにリストを追加する </summary>
         /// <param name="targetList"></param>
@@ -39,7 +39,7 @@ namespace SmasherDestruction.Editor
             {
                 foreach (var mesh in cuttedMeshes)
                 {
-                    var result = Ryden.CutMesh(mesh, anchorPos, planeNormal, capMaterial, makeGap);
+                    var result = Tsujigiri.CutMesh(mesh, anchorPos, planeNormal, capMaterial, makeGap);
                     AddCuttedListToList(results, result.ToList());
                 }
 
@@ -48,7 +48,7 @@ namespace SmasherDestruction.Editor
             else // まだ切られてない場合
             {
                 cuttedMeshes.Clear();
-                var result = Ryden.CutMesh(victim, anchorPos, planeNormal, capMaterial, makeGap);
+                var result = Tsujigiri.CutMesh(victim, anchorPos, planeNormal, capMaterial, makeGap);
                 AddCuttedListToList(cuttedMeshes, result.ToList());
             }
         }

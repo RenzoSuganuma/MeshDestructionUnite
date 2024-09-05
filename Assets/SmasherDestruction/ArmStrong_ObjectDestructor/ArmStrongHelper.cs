@@ -39,7 +39,7 @@ namespace SmasherDestruction.Editor
             {
                 foreach (var mesh in cuttedMeshes)
                 {
-                    var result = Ryden.CutMesh(mesh, anchorPos, planeNormal, capMaterial, makeGap);
+                    var result = Tsujigiri.CutMesh(mesh, anchorPos, planeNormal, capMaterial, makeGap);
                     AddCuttedListToList(results, result.ToList());
                 }
 
@@ -48,7 +48,7 @@ namespace SmasherDestruction.Editor
             else // まだ切られてない場合
             {
                 cuttedMeshes.Clear();
-                var result = Ryden.CutMesh(victim, anchorPos, planeNormal, capMaterial, makeGap);
+                var result = Tsujigiri.CutMesh(victim, anchorPos, planeNormal, capMaterial, makeGap);
                 AddCuttedListToList(cuttedMeshes, result.ToList());
             }
         }

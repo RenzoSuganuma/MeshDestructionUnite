@@ -115,7 +115,7 @@ namespace SmasherDestruction.Editor
                 {
                     case 0:
                     {
-                        RydenHelper.CutTheMesh(VictimObject, _cuttedMeshes, _planeAnchorPos, PlaneObject.up,
+                        TsujigiriUtility.CutTheMesh(VictimObject, _cuttedMeshes, _planeAnchorPos, PlaneObject.up,
                             CapMaterial, _makeGap);
                         break;
                     }

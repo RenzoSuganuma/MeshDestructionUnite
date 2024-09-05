@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEngine;
 using SmasherDestruction.Editor;
 
-public class RydenUser_RunTime : MonoBehaviour
+public class Tsujigiri_RunTime : MonoBehaviour
 {
     [SerializeField] private float _rotateSpeed;
     [SerializeField] private Material _capMaterial;
@@ -39,7 +39,7 @@ public class RydenUser_RunTime : MonoBehaviour
     {
         if (GUI.Button(new Rect(10, 700, 100, 50), "CUT"))
         {
-            RydenHelper.CutTheMesh(_victimObject, _cuttedMeshes, Vector3.zero, _planeNormal, _capMaterial);
+            TsujigiriUtility.CutTheMesh(_victimObject, _cuttedMeshes, Vector3.zero, _planeNormal, _capMaterial);
         }
     }
 }
