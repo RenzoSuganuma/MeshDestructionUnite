@@ -6,7 +6,6 @@
     public static class VoronoiUtility3D
     {
         public static int MAP_XYZ = 32;
-        public static int VORONOI_COUNT_MAX = 1;
 
         /// <summary>
         /// 点の座標と渡される座標の差分の二乗を返す
