@@ -127,18 +127,18 @@ namespace LearningVoronoi_Dalanuay
                 var p3 = vertices[polygon[i + 2]];
 
                 var lr = obj1.AddComponent<LineRenderer>();
-                lr.startWidth = .5f;
-                lr.endWidth = .5f;
+                lr.startWidth = .1f;
+                lr.endWidth = .1f;
                 lr.SetPositions(new[] { p1, p2 });
 
                 lr = obj2.AddComponent<LineRenderer>();
-                lr.startWidth = .5f;
-                lr.endWidth = .5f;
+                lr.startWidth = .1f;
+                lr.endWidth = .1f;
                 lr.SetPositions(new[] { p2, p3 });
 
                 lr = obj3.AddComponent<LineRenderer>();
-                lr.startWidth = .5f;
-                lr.endWidth = .5f;
+                lr.startWidth = .1f;
+                lr.endWidth = .1f;
                 lr.SetPositions(new[] { p3, p1 });
             }
         }

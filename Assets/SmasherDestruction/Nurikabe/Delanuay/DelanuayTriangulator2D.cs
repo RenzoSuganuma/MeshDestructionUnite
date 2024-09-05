@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace SmasherDestruction.Nurikabe.Delanuay
@@ -27,7 +28,7 @@ namespace SmasherDestruction.Nurikabe.Delanuay
             // xc,yc = 外周円の中点
             float m1, m2, mx1, mx2, my1, my2, xc, yc;
 
-            // 三角形のうち１つの辺の長さが0なら:P1
+            // 三角形のうち１つの辺の長さが0なら
             if (Mathf.Abs(p2.y - p1.y) < float.Epsilon)
             {
                 m2 = -(p3.x - p2.x) / (p3.y - p2.y); // 垂直二等分線の傾き = -1 * 辺の傾き
@@ -35,7 +36,7 @@ namespace SmasherDestruction.Nurikabe.Delanuay
                 my2 = (p2.y + p3.y) * .5f;
                 xc = (p2.x + p1.x) * .5f;
                 yc = m2 * (xc - mx2) + my2;
-            } // :P2
+            }
             else if (Mathf.Abs(p3.y - p2.y) < float.Epsilon)
             {
                 m1 = -(p2.x - p1.x) / (p2.y - p1.y);
@@ -79,10 +80,14 @@ namespace SmasherDestruction.Nurikabe.Delanuay
             dy = p1.y - yc;
             double dsqr = dx * dx + dy * dy;
 
-            return (dsqr <= rsqr); // p1,p2が同じ外接円の円周上にあるならばその円の中点との距離は p1,p2ともに等しい値である
+            // p1,p2が同じ外接円の円周上にあるならばその円の中点との距離は p1,p2ともに等しい値である
+            return (dsqr <= rsqr);
         }
 
-        public void CreateInfluencePolygon(Vector2[] XZofVertices)
+        /// <summary>
+        /// 点群から三角形分割をしたメッシュを生成する
+        /// </summary>
+        public Mesh CreateMesh(Vector2[] XZofVertices)
         {
             Vector3[] vertices = new Vector3[XZofVertices.Length];
             for (int i = 0; i < XZofVertices.Length; i++)
@@ -90,43 +95,76 @@ namespace SmasherDestruction.Nurikabe.Delanuay
                 vertices[i] = new Vector3(XZofVertices[i].x, 0, XZofVertices[i].y);
             }
 
-            foreach (var v in vertices)
-            {
-                var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                cube.transform.position = v;
-                cube.transform.localScale = Vector3.one * .5f;
-            }
+            var mesh = new Mesh();
+            mesh.vertices = vertices;
+            mesh.uv = XZofVertices;
+            mesh.triangles = TriangulatePolygon(XZofVertices);
+            mesh.RecalculateNormals();
 
-            // ポリゴンとして構成できる頂点インデックス配列を返す。
-            var polygon = TriangulatePolygon(XZofVertices);
-
-            for (int i = 0; i < polygon.Length - 3; i += 3)
-            {
-                GameObject obj1 = new GameObject($"Mesh{i + 1}");
-                GameObject obj2 = new GameObject($"Mesh{i + 2}");
-                GameObject obj3 = new GameObject($"Mesh{i + 3}");
-                var p1 = vertices[polygon[i]];
-                var p2 = vertices[polygon[i + 1]];
-                var p3 = vertices[polygon[i + 2]];
-
-                var lr = obj1.AddComponent<LineRenderer>();
-                float w = .1f;
-                lr.startWidth = w;
-                lr.endWidth = w;
-                lr.SetPositions(new[] { p1, p2 });
-
-                lr = obj2.AddComponent<LineRenderer>();
-                lr.startWidth = w;
-                lr.endWidth = w;
-                lr.SetPositions(new[] { p2, p3 });
-
-                lr = obj3.AddComponent<LineRenderer>();
-                lr.startWidth = w;
-                lr.endWidth = w;
-                lr.SetPositions(new[] { p3, p1 });
-            }
+            return mesh;
         }
 
+        /// <summary>
+        /// 渡される点群をベースのメッシュへ追加して三角形分割をしたメッシュを生成する
+        /// </summary>
+        public Mesh CreateTriangulatedMesh(Vector2[] XZofVertices, Mesh baseMesh)
+        {
+            var baseMeshUV = baseMesh.uv;
+            var applyingUVPos = new Vector2[baseMeshUV.Length + XZofVertices.Length];
+
+            var mesh = new Mesh();
+            
+            #region ApplyingVertices
+
+            Vector3[] additionalVertices = new Vector3[XZofVertices.Length];
+            for (int i = 0; i < XZofVertices.Length; i++)
+            {
+                additionalVertices[i] = new Vector3(XZofVertices[i].x, 0, XZofVertices[i].y);
+            }
+
+            Vector3[] applyingVertices =
+                new Vector3[baseMesh.vertices.Length + additionalVertices.Length];
+            for (int i = 0; i < baseMesh.vertices.Length; i++)
+            {
+                // ベースメッシュの頂点群
+                applyingVertices[i] = baseMesh.vertices[i];
+            }
+
+            for (int i = 0; i < additionalVertices.Length; i++)
+            {
+                // 追加の頂点群
+                applyingVertices[(baseMesh.vertices.Length - 1) + i] = additionalVertices[i];
+            }
+
+            #endregion
+
+            #region ApplyingUV
+
+            for (int i = 0; i < baseMeshUV.Length; i++)
+            {
+                // ベースメッシュのUV
+                applyingUVPos[i] = baseMeshUV[i];
+            }
+
+            for (int i = 0; i < XZofVertices.Length; i++)
+            {
+                // 追加のUV
+                applyingUVPos[(baseMeshUV.Length - 1) + i] = XZofVertices[i];
+            }
+
+            #endregion
+
+            mesh.vertices = applyingVertices;
+            mesh.uv = applyingUVPos;
+            mesh.triangles = TriangulatePolygon(applyingUVPos);
+            mesh.RecalculateNormals();
+
+            return mesh;
+        }
+
+        /// <summary>
+        /// 点群から三角形分割をする
+        /// </summary>
         public int[] TriangulatePolygon(Vector2[] XZofVertices)
         {
             int vertexCount = XZofVertices.Length;

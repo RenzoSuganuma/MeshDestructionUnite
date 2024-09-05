@@ -66,7 +66,12 @@ namespace LearningVoronoi_Dalanuay
 
         void CreateSites3D()
         {
-            int mapX = VoronoiUtil3D_L.MAP_XYZ, mapY = VoronoiUtil3D_L.MAP_XYZ, mapZ = VoronoiUtil3D_L.MAP_XYZ, d, ind, dmin;
+            int mapX = VoronoiUtil3D_L.MAP_XYZ,
+                mapY = VoronoiUtil3D_L.MAP_XYZ,
+                mapZ = VoronoiUtil3D_L.MAP_XYZ,
+                d,
+                ind,
+                dmin;
             for (int dd = 0; dd < mapZ; dd++)
             {
                 for (int hh = 0; hh < mapY; hh++)
@@ -101,6 +106,7 @@ namespace LearningVoronoi_Dalanuay
         // 母点を描写
         void SetSitesPoints3D()
         {
+            /*
             foreach (var point in _points)
             {
                 int x = point.x, y = point.y, z = point.z;
@@ -119,6 +125,7 @@ namespace LearningVoronoi_Dalanuay
                     }
                 }
             }
+            */
         }
     }
 
@@ -133,15 +140,6 @@ namespace LearningVoronoi_Dalanuay
         private void Start()
         {
             diagram.Make(VoronoiUtil3D_L.MAP_XYZ);
-        }
-
-        private void OnDisable()
-        {
-            diagram.CreatedObjs.ForEach(o =>
-            {
-                Destroy(o);
-                o = null;
-            });
         }
     }
 }
