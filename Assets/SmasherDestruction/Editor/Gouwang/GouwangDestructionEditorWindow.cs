@@ -1,13 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using SmasherDestruction.Core;
+using GouwangDestruction.Core;
 using UnityEditor;
 using UnityEngine;
+using SmasherDestruction.Editor;
 
-namespace SmasherDestruction.Editor
+namespace GouwangDestruction.Editor
 {
-    public class SmasherDestructionEditorWindow : EditorWindow
+    /// <summary>
+    /// 編集モード上で実行されるツールのインターフェイスの本体
+    /// </summary>
+    public sealed class GouwangDestructionEditorWindow : EditorWindow
     {
         /// <summary> 切断対象のオブジェクト </summary>
         public GameObject VictimObject;
@@ -64,13 +68,16 @@ namespace SmasherDestruction.Editor
                 EditorGUILayout.TextArea("Attach The Destruction Target",
                     SmasherDestructionConstantValues.GetGUIStyle_LabelSmall());
             }
-            
+
             // ウィンドウを閉じる ボタン
             if (GUILayout.Button("Close Window"))
             {
                 _planeRot = _planeAnchorPos = Vector3.zero;
-                PlaneObject.transform.position = _planeAnchorPos;
-                PlaneObject.transform.rotation = Quaternion.Euler(_planeRot);
+                if (PlaneObject is not null)
+                {
+                    PlaneObject.transform.position = _planeAnchorPos;
+                    PlaneObject.transform.rotation = Quaternion.Euler(_planeRot);
+                }
 
                 _serializedObject.Dispose();
                 _serializedObject = null;
@@ -121,7 +128,7 @@ namespace SmasherDestruction.Editor
                     }
                     case 1:
                     {
-                        SmasherDestructionCore.CutRandomly_ArmStrong(VictimObject, _cuttedMeshes, PlaneObject,
+                        GouwangDestructionCore.CutRandomly_ArmStrong(VictimObject, _cuttedMeshes, PlaneObject,
                             CapMaterial, _makeGap, _fragModeIndex);
                         break;
                     }
@@ -189,16 +196,16 @@ namespace SmasherDestruction.Editor
 
         private void CheckDirectory()
         {
-            ArmStrong.FindSaveTargetDirectory(ArmStrong.CuttedMeshesFolderAbsolutePath + $"{_meshName}/");
-            ArmStrong.FindSaveTargetDirectory(ArmStrong.CuttedMeshesPrefabFolderAbsolutePath);
+            Gouwang.FindSaveTargetDirectory(Gouwang.CuttedMeshesFolderAbsolutePath + $"{_meshName}/");
+            Gouwang.FindSaveTargetDirectory(Gouwang.CuttedMeshesPrefabFolderAbsolutePath);
         }
 
         private void SaveCuttedMeshes() // 保存先のパスにメッシュのアセットとプレハブを保存する
         {
             if (_cuttedMeshes.Count < 1) return;
 
-            ArmStrong.FindSaveTargetDirectory(ArmStrong.CuttedMeshesFolderAbsolutePath + $"{_meshName}/");
-            ArmStrong.FindSaveTargetDirectory(ArmStrong.CuttedMeshesPrefabFolderAbsolutePath);
+            Gouwang.FindSaveTargetDirectory(Gouwang.CuttedMeshesFolderAbsolutePath + $"{_meshName}/");
+            Gouwang.FindSaveTargetDirectory(Gouwang.CuttedMeshesPrefabFolderAbsolutePath);
 
             _cuttedMeshes[0].name = _meshName;
 
@@ -223,11 +230,11 @@ namespace SmasherDestruction.Editor
                 var mesh = _cuttedMeshes[i].GetComponent<MeshFilter>().sharedMesh;
 
                 AssetDatabase.CreateAsset(mesh,
-                    ArmStrong.CuttedMeshesFolderAbsolutePath + $"{_meshName}/{mesh.name}_{i}.asset");
+                    Gouwang.CuttedMeshesFolderAbsolutePath + $"{_meshName}/{mesh.name}_{i}.asset");
             }
 
             PrefabUtility.SaveAsPrefabAsset(_cuttedMeshes[0],
-                ArmStrong.CuttedMeshesPrefabFolderAbsolutePath + $"{_meshName}.prefab");
+                Gouwang.CuttedMeshesPrefabFolderAbsolutePath + $"{_meshName}.prefab");
         }
     }
 }

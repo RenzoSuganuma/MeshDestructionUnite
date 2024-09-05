@@ -8,8 +8,8 @@ using UnityEngine;
 namespace SmasherDestruction.Editor
 {
     /// <summary> 被破壊メッシュを生成する機能を提供する </summary>
-// Ver 1.0.0
-    public static class ArmStrong
+    /// Ver 1.0.0
+    public static class Gouwang
     {
         public static string CuttedMeshesFolderAbsolutePath = "Assets/Resources/SmasherDestruction/CuttedMeshes/";
         public static string CuttedMeshesPrefabFolderAbsolutePath = "Assets/Resources/SmasherDestruction/Prefabs/";

@@ -14,7 +14,7 @@ namespace SmasherDestruction.Editor
         private static List<Vector3> _newVertices = new List<Vector3>();
 
         /// <summary>
-        /// メッシュを切断し、切断されたメッシュを返す
+        /// メッシュを切断し、切断されたメッシュを返す ラッパーメソッド
         /// </summary>
         /// <param name="victim">切断対象のゲームオブジェクト</param>
         /// <param name="anchorPos">切断面のアンカー位置</param>
@@ -153,6 +153,14 @@ namespace SmasherDestruction.Editor
             return new GameObject[] { leftObj, rightObj };
         }
 
+        /// <summary>
+        /// メッシュ切断の本体
+        /// </summary>
+        /// <param name="subMesh"></param>
+        /// <param name="sides"></param>
+        /// <param name="index0"></param>
+        /// <param name="index1"></param>
+        /// <param name="index2"></param>
         private static void CutThisFace(int subMesh, bool[] sides, int index0, int index1, int index2)
         {
             Vector3[] leftPoints = new Vector3[2];
@@ -345,7 +353,7 @@ namespace SmasherDestruction.Editor
         }
 
         /// <summary>
-        /// 渡されたポリゴン配列の基づいてポリゴンの形成をする
+        /// 渡された頂点の配列の基づいてポリゴンの形成をする
         /// </summary>
         /// <param name="verts">ポリゴンの頂点リスト</param>
         private static void FillCap(List<Vector3> verts)

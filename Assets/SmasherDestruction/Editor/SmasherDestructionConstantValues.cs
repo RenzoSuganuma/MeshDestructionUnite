@@ -2,6 +2,9 @@
 
 namespace SmasherDestruction.Editor
 {
+    /// <summary>
+    /// GUIレイアウトのプリセット
+    /// </summary>
     public static class SmasherDestructionConstantValues
     {
         public static int SmasherLabelFontSize = 32;

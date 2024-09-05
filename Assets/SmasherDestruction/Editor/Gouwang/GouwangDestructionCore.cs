@@ -8,11 +8,14 @@ using UnityEngine.Serialization;
 using Random = System.Random;
 using SmasherDestruction.Editor;
 
-namespace SmasherDestruction.Core
+namespace GouwangDestruction.Core
 {
-    public static class SmasherDestructionCore
+    /// <summary>
+    /// 編集モードで実行されるAPIを提供している剛腕クラス
+    /// </summary>
+    public static class GouwangDestructionCore
     {
-        #region アームストロング
+        #region 剛腕【旧アームストロング】
 
         private static Material _capMaterial;
         private static GameObject _victimObject;
@@ -53,7 +56,7 @@ namespace SmasherDestruction.Core
         {
             if (_victimObject is null) return;
 
-            ArmStrongHelper.CutTheMesh(_victimObject, _cuttedMeshes, _planeObject.transform.position,
+            TsujigiriUtility.CutTheMesh(_victimObject, _cuttedMeshes, _planeObject.transform.position,
                 _planeObject.transform.up,
                 _capMaterial, _makeGap);
         }
@@ -199,7 +202,6 @@ namespace SmasherDestruction.Core
         }
 
         #endregion
-        
         #endregion
     }
 }
