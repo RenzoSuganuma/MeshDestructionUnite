@@ -55,7 +55,7 @@ public sealed class DelaunayTriangulator3D
     /// </summary>
     ///
     /// おそらく 「円周角の定理(共円条件)の逆」を利用している
-    public bool TriangulatePolygonSubFuncInCyrcle
+    public bool PointsIsInCircle
         (Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4)
     {
         // 渡された三角形を構成する辺のうち２つの長さが0に近いときは三角形が構成できない
@@ -214,7 +214,7 @@ public sealed class DelaunayTriangulator3D
             List<DelaunayEdge3D> edges = new();
             for (int j = 0; j < triangleList.Count; j++)
             {
-                if (TriangulatePolygonSubFuncInCyrcle
+                if (PointsIsInCircle
                     (
                         expandedXZ[i],
                         expandedXZ[triangleList[j].p1],
