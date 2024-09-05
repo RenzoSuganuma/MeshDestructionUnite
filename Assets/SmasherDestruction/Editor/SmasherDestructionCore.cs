@@ -53,7 +53,7 @@ namespace SmasherDestruction.Core
         {
             if (_victimObject is null) return;
 
-            ArmStrongHelper.CutTheMesh(_victimObject, _cuttedMeshes, _planeObject.transform.position,
+            GouwangUtility.CutTheMesh(_victimObject, _cuttedMeshes, _planeObject.transform.position,
                 _planeObject.transform.up,
                 _capMaterial, _makeGap);
         }

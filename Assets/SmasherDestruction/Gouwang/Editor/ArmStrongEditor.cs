@@ -2,14 +2,14 @@ using UnityEditor;
 using UnityEngine;
 
 /// <summary> MachomanUserのインスペクタを拡張する。ボタンの追加をする </summary>
-[CustomEditor(typeof(ArmStrongUser_RunTime))]
+[CustomEditor(typeof(Gouwang_RunTime))]
 public class ArmStrongEditor : Editor // MachoManクラスを拡張する
 {
     public override void OnInspectorGUI()
     {
         base.OnInspectorGUI();
 
-        ArmStrongUser_RunTime userRunTime = target as ArmStrongUser_RunTime;
+        Gouwang_RunTime userRunTime = target as Gouwang_RunTime;
 
         if (GUILayout.Button("Cut"))
         {

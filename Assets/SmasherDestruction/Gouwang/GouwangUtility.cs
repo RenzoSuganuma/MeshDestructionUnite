@@ -5,8 +5,8 @@ using UnityEngine;
 
 namespace SmasherDestruction.Editor
 {
-    /// <summary> Machomanクラスの窓口 </summary>
-    public static class ArmStrongHelper
+    /// <summary> 剛腕のユーティリティクラス </summary>
+    public static class GouwangUtility
     {
         /// <summary> 要素の重複を許さないでリストにリストを追加する </summary>
         /// <param name="targetList"></param>

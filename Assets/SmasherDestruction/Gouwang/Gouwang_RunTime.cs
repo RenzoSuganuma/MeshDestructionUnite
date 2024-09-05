@@ -9,7 +9,7 @@ using Random = System.Random;
 using SmasherDestruction.Editor;
 
 /// <summary> これがアタッチされているオブジェクトをヒエラルキーに投げる。 </summary>
-public class ArmStrongUser_RunTime : MonoBehaviour
+public class Gouwang_RunTime : MonoBehaviour
 {
     public enum FragmentationMode
     {
@@ -36,15 +36,15 @@ public class ArmStrongUser_RunTime : MonoBehaviour
 
     public void CheckDirectory() // 保存パスが存在するか確認する
     {
-        ArmStrong.FindSaveTargetDirectory(ArmStrong.CuttedMeshesFolderAbsolutePath + $"{_objectName}/");
-        ArmStrong.FindSaveTargetDirectory(ArmStrong.CuttedMeshesPrefabFolderAbsolutePath);
+        Gouwang.FindSaveTargetDirectory(Gouwang.CuttedMeshesFolderAbsolutePath + $"{_objectName}/");
+        Gouwang.FindSaveTargetDirectory(Gouwang.CuttedMeshesPrefabFolderAbsolutePath);
     }
 
     public void CutMesh() // メッシュのカットを実施する
     {
         if (_victimObject is null) return;
 
-        ArmStrongHelper.CutTheMesh(_victimObject, _cuttedMeshes, _planeObject.transform.position,
+        GouwangUtility.CutTheMesh(_victimObject, _cuttedMeshes, _planeObject.transform.position,
             _planeObject.transform.up,
             _capMaterial, _makeGap);
     }
@@ -177,8 +177,8 @@ public class ArmStrongUser_RunTime : MonoBehaviour
     {
         if (_cuttedMeshes.Count < 1) return;
 
-        ArmStrong.FindSaveTargetDirectory(ArmStrong.CuttedMeshesFolderAbsolutePath + $"{_objectName}/");
-        ArmStrong.FindSaveTargetDirectory(ArmStrong.CuttedMeshesPrefabFolderAbsolutePath);
+        Gouwang.FindSaveTargetDirectory(Gouwang.CuttedMeshesFolderAbsolutePath + $"{_objectName}/");
+        Gouwang.FindSaveTargetDirectory(Gouwang.CuttedMeshesPrefabFolderAbsolutePath);
 
         _cuttedMeshes[0].name = _objectName;
 
@@ -206,11 +206,11 @@ public class ArmStrongUser_RunTime : MonoBehaviour
             var mesh = _cuttedMeshes[i].GetComponent<MeshFilter>().mesh;
 
             AssetDatabase.CreateAsset(mesh,
-                ArmStrong.CuttedMeshesFolderAbsolutePath + $"{_objectName}/{mesh.name}_{i}.asset");
+                Gouwang.CuttedMeshesFolderAbsolutePath + $"{_objectName}/{mesh.name}_{i}.asset");
         }
 
         PrefabUtility.SaveAsPrefabAsset(_cuttedMeshes[0],
-            ArmStrong.CuttedMeshesPrefabFolderAbsolutePath + $"{_objectName}.prefab");
+            Gouwang.CuttedMeshesPrefabFolderAbsolutePath + $"{_objectName}.prefab");
     }
 
     private void Start()
