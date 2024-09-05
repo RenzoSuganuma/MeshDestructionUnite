@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace SmasherDestruction.Kamaitachi.Delanuay
+namespace SmasherDestruction.Nurikabe.Delanuay
 {
     /// <summary>
     /// ドロネー三角形を形成する機能を提供するクラス
     /// </summary>
-    public sealed class DelanuayTriangulator3D
+    public sealed class DelanuayTriangulator
     {
         /// <summary>
         /// 円上の頂点で三角形を構成する
@@ -169,12 +169,12 @@ namespace SmasherDestruction.Kamaitachi.Delanuay
             expandedXZ[vertexCount] = new Vector2((xmid - 2 * dmax), (ymid - dmax));
             expandedXZ[vertexCount + 1] = new Vector2(xmid, (ymid + 2 * dmax));
             expandedXZ[vertexCount + 2] = new Vector2((xmid + 2 * dmax), (ymid - dmax));
-            List<DelanuayTriangle3D> triangleList = new();
+            List<DelanuayTriangle> triangleList = new();
             triangleList.Add(
-                new DelanuayTriangle3D(vertexCount, vertexCount + 1, vertexCount + 2));
+                new DelanuayTriangle(vertexCount, vertexCount + 1, vertexCount + 2));
             for (int i = 0; i < vertexCount; i++)
             {
-                List<DelanuayEdge3D> edges = new();
+                List<DelanuayEdge> edges = new();
                 for (int j = 0; j < triangleList.Count; j++)
                 {
                     if (PointsIsInCircle
@@ -185,9 +185,9 @@ namespace SmasherDestruction.Kamaitachi.Delanuay
                             expandedXZ[triangleList[j].p3]
                         ))
                     {
-                        edges.Add(new DelanuayEdge3D(triangleList[j].p1, triangleList[j].p2));
-                        edges.Add(new DelanuayEdge3D(triangleList[j].p2, triangleList[j].p3));
-                        edges.Add(new DelanuayEdge3D(triangleList[j].p3, triangleList[j].p1));
+                        edges.Add(new DelanuayEdge(triangleList[j].p1, triangleList[j].p2));
+                        edges.Add(new DelanuayEdge(triangleList[j].p2, triangleList[j].p3));
+                        edges.Add(new DelanuayEdge(triangleList[j].p3, triangleList[j].p1));
                         triangleList.RemoveAt(j);
                         j--;
                     }
@@ -214,7 +214,7 @@ namespace SmasherDestruction.Kamaitachi.Delanuay
 
                 for (int j = 0; j < edges.Count; j++)
                 {
-                    triangleList.Add(new DelanuayTriangle3D(edges[j].p1, edges[j].p2, i));
+                    triangleList.Add(new DelanuayTriangle(edges[j].p1, edges[j].p2, i));
                 }
 
                 edges.Clear();

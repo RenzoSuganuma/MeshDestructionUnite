@@ -1,10 +1,10 @@
-﻿namespace SmasherDestruction.Kamaitachi
+﻿namespace SmasherDestruction.Nurikabe
 {
     /// <summary>
-    /// 編集モードの鎌鼬のクラス
+    /// 編集モードのぬりかべのクラス
     /// ドロネー三角形分割などの機能を提供する。
     /// </summary>
-    public static class Kamaitachi
+    public static class Nurikabe
     {
         
     }
