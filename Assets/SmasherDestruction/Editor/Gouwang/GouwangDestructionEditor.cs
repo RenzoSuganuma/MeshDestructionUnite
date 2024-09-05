@@ -5,7 +5,10 @@ using UnityEngine.UIElements;
 
 namespace GouwangDestruction.Editor
 {
-    public class GouwangDestructionEditor : EditorWindow
+    /// <summary>
+    /// 編集モードの剛腕クラスをツールバーから呼び出せるように実装しているクラス
+    /// </summary>
+    public sealed class GouwangDestructionEditor : EditorWindow
     {
         [MenuItem("Window/SmasherDestruction")]
         public static void ShowSmasherWindow()

@@ -10,6 +10,9 @@ using SmasherDestruction.Editor;
 
 namespace GouwangDestruction.Core
 {
+    /// <summary>
+    /// 編集モードで実行されるAPIを提供している剛腕クラス
+    /// </summary>
     public static class GouwangDestructionCore
     {
         #region 剛腕【旧アームストロング】
@@ -199,7 +202,6 @@ namespace GouwangDestruction.Core
         }
 
         #endregion
-        
         #endregion
     }
 }

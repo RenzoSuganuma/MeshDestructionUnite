@@ -8,7 +8,10 @@ using SmasherDestruction.Editor;
 
 namespace GouwangDestruction.Editor
 {
-    public class GouwangDestructionEditorWindow : EditorWindow
+    /// <summary>
+    /// 編集モード上で実行されるツールのインターフェイスの本体
+    /// </summary>
+    public sealed class GouwangDestructionEditorWindow : EditorWindow
     {
         /// <summary> 切断対象のオブジェクト </summary>
         public GameObject VictimObject;
