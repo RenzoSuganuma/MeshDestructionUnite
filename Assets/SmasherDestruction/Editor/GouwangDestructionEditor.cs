@@ -3,14 +3,14 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace SmasherDestruction.Editor
+namespace GouwangDestruction.Editor
 {
-    public class SmasherDestructionEditor : EditorWindow
+    public class GouwangDestructionEditor : EditorWindow
     {
         [MenuItem("Window/SmasherDestruction")]
         public static void ShowSmasherWindow()
         {
-            var window = GetWindow<SmasherDestructionEditorWindow>();
+            var window = GetWindow<GouwangDestructionEditorWindow>();
             window.titleContent = new GUIContent("SmasherDestructionEditor");
         }
     }

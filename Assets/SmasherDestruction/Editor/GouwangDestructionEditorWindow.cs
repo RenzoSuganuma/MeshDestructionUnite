@@ -1,13 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using SmasherDestruction.Core;
+using GouwangDestruction.Core;
 using UnityEditor;
 using UnityEngine;
+using SmasherDestruction.Editor;
 
-namespace SmasherDestruction.Editor
+namespace GouwangDestruction.Editor
 {
-    public class SmasherDestructionEditorWindow : EditorWindow
+    public class GouwangDestructionEditorWindow : EditorWindow
     {
         /// <summary> 切断対象のオブジェクト </summary>
         public GameObject VictimObject;
@@ -124,7 +125,7 @@ namespace SmasherDestruction.Editor
                     }
                     case 1:
                     {
-                        SmasherDestructionCore.CutRandomly_ArmStrong(VictimObject, _cuttedMeshes, PlaneObject,
+                        GouwangDestructionCore.CutRandomly_ArmStrong(VictimObject, _cuttedMeshes, PlaneObject,
                             CapMaterial, _makeGap, _fragModeIndex);
                         break;
                     }
