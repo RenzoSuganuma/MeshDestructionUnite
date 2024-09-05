@@ -20,7 +20,7 @@ namespace SmasherDestruction.Kamaitachi.Voronoi
         /// <summary>
         /// ３次元ボロノイを生成する...?
         /// </summary>
-        public void Make(int count)
+        public void CreateVoronoi(int count)
         {
             CreatePointAndColor(count);
             CreateSites();
@@ -55,33 +55,34 @@ namespace SmasherDestruction.Kamaitachi.Voronoi
             int mapX = VoronoiUtility3D.MAP_XYZ,
                 mapY = VoronoiUtility3D.MAP_XYZ,
                 mapZ = VoronoiUtility3D.MAP_XYZ,
-                d,
+                dis,
                 ind,
                 dmin;
-            for (int dd = 0; dd < mapZ; dd++)
+            for (int d = 0; d < mapZ; d++) // depth
             {
-                for (int hh = 0; hh < mapY; hh++)
+                for (int h = 0; h < mapY; h++) // height
                 {
-                    for (int ww = 0; ww < mapX; ww++)
+                    for (int w = 0; w < mapX; w++) // width
                     {
                         ind = -1;
                         dmin = Int32.MaxValue;
-                        for (int it = 0; it < _points.Count; it++)
+                        for (int i = 0; i < _points.Count; i++)
                         {
-                            VoronoiPoint3D p = _points[it];
-                            d = VoronoiUtility3D.DistanceSqrt(p, ww, hh, dd);
-                            if (d < dmin)
+                            VoronoiPoint3D p = _points[i];
+                            dis = VoronoiUtility3D.DistanceSqrt(p, w, h, d);
+                            if (dis < dmin)
                             {
-                                dmin = d; // 一番近い母点との距離
-                                ind = it; // 一番近い母点の添え字
+                                dmin = dis; // 一番近い母点との距離
+                                ind = i; // 一番近い母点の添え字
                             }
                         }
 
+                        // 一番近い母点があるならば
                         if (ind > -1)
                         {
                             // ↓ ここで母点のある領域内にあるピクセルの描写をしている
                             var obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                            obj.transform.position = new Vector3(ww, hh, dd);
+                            obj.transform.position = new Vector3(w, h, d);
                             obj.GetComponent<MeshRenderer>().material.color = _colors[ind];
                             _createdObjs.Add(obj);
                             // ↑ ここで母点のある領域内にあるピクセルの描写をしている
