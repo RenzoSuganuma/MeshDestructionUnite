@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary> 切断されたメッシュ </summary>
+/// <summary> 切断されたメッシュ情報を一時的に保存する時に活用する </summary>
 public class CuttedMesh
 {
     public List<Vector3> Vertices = new List<Vector3>();

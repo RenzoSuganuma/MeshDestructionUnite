@@ -64,13 +64,16 @@ namespace SmasherDestruction.Editor
                 EditorGUILayout.TextArea("Attach The Destruction Target",
                     SmasherDestructionConstantValues.GetGUIStyle_LabelSmall());
             }
-            
+
             // ウィンドウを閉じる ボタン
             if (GUILayout.Button("Close Window"))
             {
                 _planeRot = _planeAnchorPos = Vector3.zero;
-                PlaneObject.transform.position = _planeAnchorPos;
-                PlaneObject.transform.rotation = Quaternion.Euler(_planeRot);
+                if (PlaneObject is not null)
+                {
+                    PlaneObject.transform.position = _planeAnchorPos;
+                    PlaneObject.transform.rotation = Quaternion.Euler(_planeRot);
+                }
 
                 _serializedObject.Dispose();
                 _serializedObject = null;

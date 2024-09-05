@@ -4,6 +4,9 @@ using System.Linq;
 using UnityEngine;
 using SmasherDestruction.Editor;
 
+/// <summary>
+/// 辻斬りをランタイムで使う時のサンプルのクラス
+/// </summary>
 public class Tsujigiri_RunTime : MonoBehaviour
 {
     [SerializeField] private float _rotateSpeed;
@@ -39,6 +42,7 @@ public class Tsujigiri_RunTime : MonoBehaviour
     {
         if (GUI.Button(new Rect(10, 700, 100, 50), "CUT"))
         {
+            // あらかじめ決めておいた平面を用意してこのメソッドを呼ぶ
             TsujigiriUtility.CutTheMesh(_victimObject, _cuttedMeshes, Vector3.zero, _planeNormal, _capMaterial);
         }
     }

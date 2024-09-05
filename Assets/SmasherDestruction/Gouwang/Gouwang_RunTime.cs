@@ -44,7 +44,7 @@ public class Gouwang_RunTime : MonoBehaviour
     {
         if (_victimObject is null) return;
 
-        GouwangUtility.CutTheMesh(_victimObject, _cuttedMeshes, _planeObject.transform.position,
+        TsujigiriUtility.CutTheMesh(_victimObject, _cuttedMeshes, _planeObject.transform.position,
             _planeObject.transform.up,
             _capMaterial, _makeGap);
     }

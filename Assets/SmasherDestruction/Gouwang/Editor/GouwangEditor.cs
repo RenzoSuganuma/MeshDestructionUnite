@@ -1,9 +1,9 @@
 using UnityEditor;
 using UnityEngine;
 
-/// <summary> MachomanUserのインスペクタを拡張する。ボタンの追加をする </summary>
+/// <summary> 剛腕ランタイムのインスペクタを拡張する。ボタンの追加をする </summary>
 [CustomEditor(typeof(Gouwang_RunTime))]
-public class ArmStrongEditor : Editor // MachoManクラスを拡張する
+public class GouwangEditor : Editor // 剛腕クラスを拡張する
 {
     public override void OnInspectorGUI()
     {

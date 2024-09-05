@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace SmasherDestruction.Editor
 {
-    /// <summary> 辻斬りクラスを簡単に利用するためのヘルパークラス </summary>
+    /// <summary> ランタイムで辻斬りクラスを簡単に利用するためのヘルパークラス </summary>
     public static class TsujigiriUtility
     {
         /// <summary> 要素の重複を許さないでリストにリストを追加する </summary>
