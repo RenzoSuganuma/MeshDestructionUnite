@@ -3,7 +3,7 @@
     /// <summary>
     /// 母点の構造体
     /// </summary>
-    public struct Point
+    public struct VoronoiPoint3D
     {
         public int x, y, z;
     }

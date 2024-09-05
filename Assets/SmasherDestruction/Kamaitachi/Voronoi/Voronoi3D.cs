@@ -8,9 +8,9 @@ namespace SmasherDestruction.Kamaitachi.Voronoi
     /// <summary>
     /// ボロノイのクラス
     /// </summary>
-    public sealed class Voronoi
+    public sealed class Voronoi3D
     {
-        private List<Point> _points = new();
+        private List<VoronoiPoint3D> _points = new();
         private List<Color> _colors = new();
 
         // ↓ 生成したキューブを格納しておく配列【実際（ツールの機能）にはいらない変数】
@@ -34,12 +34,12 @@ namespace SmasherDestruction.Kamaitachi.Voronoi
         /// </summary>
         void CreatePointAndColor(int count)
         {
-            int mapX = VoronoiUtility.MAP_XYZ - 20;
-            int mapY = VoronoiUtility.MAP_XYZ - 20;
-            int mapZ = VoronoiUtility.MAP_XYZ - 20;
+            int mapX = VoronoiUtility3D.MAP_XYZ - 20;
+            int mapY = VoronoiUtility3D.MAP_XYZ - 20;
+            int mapZ = VoronoiUtility3D.MAP_XYZ - 20;
             for (int i = 0; i < count; i++)
             {
-                var pnt = new Point();
+                var pnt = new VoronoiPoint3D();
                 pnt.x = Random.Range(0, mapX) + 10;
                 pnt.y = Random.Range(0, mapY) + 10;
                 pnt.z = Random.Range(0, mapZ) + 10;
@@ -52,9 +52,9 @@ namespace SmasherDestruction.Kamaitachi.Voronoi
 
         void CreateSites()
         {
-            int mapX = VoronoiUtility.MAP_XYZ,
-                mapY = VoronoiUtility.MAP_XYZ,
-                mapZ = VoronoiUtility.MAP_XYZ,
+            int mapX = VoronoiUtility3D.MAP_XYZ,
+                mapY = VoronoiUtility3D.MAP_XYZ,
+                mapZ = VoronoiUtility3D.MAP_XYZ,
                 d,
                 ind,
                 dmin;
@@ -68,8 +68,8 @@ namespace SmasherDestruction.Kamaitachi.Voronoi
                         dmin = Int32.MaxValue;
                         for (int it = 0; it < _points.Count; it++)
                         {
-                            Point p = _points[it];
-                            d = VoronoiUtility.DistanceSqrt(p, ww, hh, dd);
+                            VoronoiPoint3D p = _points[it];
+                            d = VoronoiUtility3D.DistanceSqrt(p, ww, hh, dd);
                             if (d < dmin)
                             {
                                 dmin = d; // 一番近い母点との距離
