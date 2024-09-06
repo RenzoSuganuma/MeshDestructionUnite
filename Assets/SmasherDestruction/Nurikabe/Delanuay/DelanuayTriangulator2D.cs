@@ -85,7 +85,7 @@ namespace SmasherDestruction.Nurikabe.Delanuay
         }
 
         /// <summary>
-        /// 点群から三角形分割をしたメッシュを生成する
+        /// 頂点群【X,Z成分を抽出したもの】から三角形分割をしたメッシュを生成する
         /// </summary>
         public Mesh CreateMesh(Vector2[] XZofVertices)
         {
@@ -113,7 +113,7 @@ namespace SmasherDestruction.Nurikabe.Delanuay
             var applyingUVPos = new Vector2[baseMeshUV.Length + XZofVertices.Length];
 
             var mesh = new Mesh();
-            
+
             #region ApplyingVertices
 
             Vector3[] additionalVertices = new Vector3[XZofVertices.Length];
