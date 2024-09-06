@@ -6,10 +6,5 @@
     public struct VoronoiPoint3D
     {
         public int x, y, z;
-
-        public string ToString()
-        {
-            return $"{x},{y},{z}";
-        }
     }
 }
