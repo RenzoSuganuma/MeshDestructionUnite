@@ -8,7 +8,7 @@ namespace SmasherDestruction.Kamaitachi.Voronoi
     /// <summary>
     /// ボロノイのクラス
     /// </summary>
-    public sealed class Voronoi3D
+    public sealed class Voronoi3DForMesh
     {
         private List<VoronoiPoint3D> _points = new();
         private List<Color> _colors = new();
