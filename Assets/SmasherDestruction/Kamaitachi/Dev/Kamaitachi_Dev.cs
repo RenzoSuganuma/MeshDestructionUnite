@@ -13,8 +13,18 @@ namespace SmasherDestruction.Kamaitachi.Dev
         private void Start()
         {
             _v3d.CreateVoronoi(5, _mf.sharedMesh);
-            Debug.Log(_v3d.GetInformation());
-            Debug.Log(_v3d.Sites[0].Count);
+            var vertices = _mf.sharedMesh.vertices;
+            for (int i = 0; i < _v3d.Sites.Length; i++)
+            {
+                var list = _v3d.Sites[3];
+                foreach (var item in list)
+                {
+                    var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    cube.transform.localPosition = vertices[item];
+                    cube.transform.localScale = Vector3.one * .05f;
+                    cube.GetComponent<MeshRenderer>().material.color = _v3d.Colors[i];
+                }
+            }
         }
     }
 }

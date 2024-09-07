@@ -25,6 +25,8 @@ namespace SmasherDestruction.Kamaitachi.Voronoi
 
         public List<int>[] Sites => _sites;
 
+        public List<Color> Colors => _colors;
+
         /// <summary>
         /// ３次元ボロノイを生成する...?
         /// </summary>
@@ -211,7 +213,7 @@ namespace SmasherDestruction.Kamaitachi.Voronoi
                 }
             }
 
-            int dbIndex = 0;
+            int dbIndex = 4;
             if (_sites[dbIndex] is not null)
                 _sites[dbIndex].ForEach(o => Debug.Log(o + ","));
         }
