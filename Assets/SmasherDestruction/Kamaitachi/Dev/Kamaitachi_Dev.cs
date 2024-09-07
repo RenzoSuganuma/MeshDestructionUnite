@@ -15,6 +15,7 @@ namespace SmasherDestruction.Kamaitachi.Dev
             _v3d.CreateVoronoi(5, _mf.sharedMesh);
             var vertices = _mf.sharedMesh.vertices;
 
+            // ↓ これをVoronoi3Dクラス内で実行しておく
             // １頂点１領域になるように排他処理
             for (int i = _v3d.Sites.Length - 1; i >= 0; i--)
             {

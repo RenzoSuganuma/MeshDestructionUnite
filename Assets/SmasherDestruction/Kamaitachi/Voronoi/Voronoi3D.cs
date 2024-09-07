@@ -152,7 +152,7 @@ namespace SmasherDestruction.Kamaitachi.Voronoi
         }
 
         /// <summary>
-        /// 領域を生成する
+        /// 渡されたメッシュから領域を生成する
         /// </summary>
         void CreateSites(Mesh mesh)
         {
@@ -203,12 +203,6 @@ namespace SmasherDestruction.Kamaitachi.Voronoi
                         {
                             _sites[ind].Add(i);
                         }
-
-                        // ↓ ここで母点のある領域内にあるピクセルの描写をしている
-                        // var obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                        // obj.transform.position = new Vector3(x, y, z);
-                        // obj.GetComponent<MeshRenderer>().material.color = _colors[ind];
-                        // ↑ ここで母点のある領域内にあるピクセルの描写をしている
                     }
                 }
             }
