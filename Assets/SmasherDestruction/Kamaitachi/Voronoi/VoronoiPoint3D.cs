@@ -6,5 +6,12 @@
     public struct VoronoiPoint3D
     {
         public int x, y, z;
+        
+        public VoronoiPoint3D(int x, int y, int z)
+        {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        }
     }
 }

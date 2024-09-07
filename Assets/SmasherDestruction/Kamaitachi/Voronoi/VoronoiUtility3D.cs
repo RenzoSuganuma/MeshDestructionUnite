@@ -17,5 +17,16 @@
             int zd = z - voronoiPoint3D.z;
             return (xd * xd) + (yd * yd) + (zd * zd);
         }
+        
+        /// <summary>
+        /// 点の座標と渡される座標の差分の二乗を返す
+        /// </summary>
+        public static float DistanceSqrt(VoronoiPoint3Df voronoiPoint3D, float x, float y, float z)
+        {
+            float xd = x - voronoiPoint3D.x;
+            float yd = y - voronoiPoint3D.y;
+            float zd = z - voronoiPoint3D.z;
+            return (xd * xd) + (yd * yd) + (zd * zd);
+        }
     }
 }

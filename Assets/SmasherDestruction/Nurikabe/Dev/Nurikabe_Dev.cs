@@ -1,10 +1,9 @@
 ﻿using System;
 using SmasherDestruction.Nurikabe.Delanuay;
 using UnityEngine;
-using UnityEngine.PlayerLoop;
 using Random = UnityEngine.Random;
 
-public class Nurikabe_Dev : UnityEngine.MonoBehaviour
+public class Nurikabe_Dev : MonoBehaviour
 {
     [SerializeField] private MeshFilter _mf;
     private DelanuayTriangulator2D _d = new();
