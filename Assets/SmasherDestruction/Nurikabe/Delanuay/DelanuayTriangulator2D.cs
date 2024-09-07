@@ -13,7 +13,7 @@ namespace SmasherDestruction.Nurikabe.Delanuay
         /// 円上の頂点で三角形を構成する
         /// </summary>
         /// おそらく 「円周角の定理(共円条件)の逆」を利用している
-        public bool PointsIsInCircle
+        public bool IsPointsInCircle
             (Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4)
         {
             // 渡された三角形を構成する辺のうち２つの長さが0に近いときは三角形が構成できない
@@ -87,7 +87,7 @@ namespace SmasherDestruction.Nurikabe.Delanuay
         /// <summary>
         /// 頂点群【X,Z成分を抽出したもの】から三角形分割をしたメッシュを生成する
         /// </summary>
-        public Mesh CreateMesh(Vector2[] XZofVertices)
+        public Mesh CreateMeshFromXZ(Vector2[] XZofVertices)
         {
             Vector3[] vertices = new Vector3[XZofVertices.Length];
             for (int i = 0; i < XZofVertices.Length; i++)
@@ -105,91 +105,53 @@ namespace SmasherDestruction.Nurikabe.Delanuay
         }
 
         /// <summary>
-        /// 渡される点群をベースのメッシュへ追加して三角形分割をしたメッシュを生成する
+        /// 頂点群【X,Y成分を抽出したもの】から三角形分割をしたメッシュを生成する
         /// </summary>
-        public Mesh CreateTriangulatedMesh(Vector2[] XZofVertices, Mesh baseMesh)
+        public Mesh CreateMeshFromXY(Vector2[] XYofVertices)
         {
-            var baseMeshUV = baseMesh.uv;
-            var applyingUVPos = new Vector2[baseMeshUV.Length + XZofVertices.Length];
+            Vector3[] vertices = new Vector3[XYofVertices.Length];
+            for (int i = 0; i < XYofVertices.Length; i++)
+            {
+                vertices[i] = new Vector3(XYofVertices[i].x, XYofVertices[i].y, 0);
+            }
 
             var mesh = new Mesh();
-
-            #region ApplyingVertices
-
-            Vector3[] additionalVertices = new Vector3[XZofVertices.Length];
-            for (int i = 0; i < XZofVertices.Length; i++)
-            {
-                additionalVertices[i] = new Vector3(XZofVertices[i].x, 0, XZofVertices[i].y);
-            }
-
-            Vector3[] applyingVertices =
-                new Vector3[baseMesh.vertices.Length + additionalVertices.Length];
-            for (int i = 0; i < baseMesh.vertices.Length; i++)
-            {
-                // ベースメッシュの頂点群
-                applyingVertices[i] = baseMesh.vertices[i];
-            }
-
-            for (int i = 0; i < additionalVertices.Length; i++)
-            {
-                // 追加の頂点群
-                applyingVertices[(baseMesh.vertices.Length - 1) + i] = additionalVertices[i];
-            }
-
-            #endregion
-
-            #region ApplyingUV
-
-            for (int i = 0; i < baseMeshUV.Length; i++)
-            {
-                // ベースメッシュのUV
-                applyingUVPos[i] = baseMeshUV[i];
-            }
-
-            for (int i = 0; i < XZofVertices.Length; i++)
-            {
-                // 追加のUV
-                applyingUVPos[(baseMeshUV.Length - 1) + i] = XZofVertices[i];
-            }
-
-            #endregion
-
-            mesh.vertices = applyingVertices;
-            mesh.uv = applyingUVPos;
-            mesh.triangles = TriangulatePolygon(applyingUVPos);
+            mesh.vertices = vertices;
+            mesh.uv = XYofVertices;
+            mesh.triangles = TriangulatePolygon(XYofVertices);
             mesh.RecalculateNormals();
 
             return mesh;
         }
 
         /// <summary>
-        /// 点群から三角形分割をする
+        /// 頂点群【2成分を抽出したもの】から三角形分割をする
         /// </summary>
-        public int[] TriangulatePolygon(Vector2[] XZofVertices)
+        public int[] TriangulatePolygon(Vector2[] TwoComponentsOfVertices)
         {
-            int vertexCount = XZofVertices.Length;
-            float xmin = XZofVertices[0].x;
-            float ymin = XZofVertices[0].y;
+            int vertexCount = TwoComponentsOfVertices.Length;
+            float xmin = TwoComponentsOfVertices[0].x;
+            float ymin = TwoComponentsOfVertices[0].y;
             float xmax = xmin;
             float ymax = ymin;
 
             for (int i = 1; i < vertexCount; i++)
             {
-                if (XZofVertices[i].x < xmin)
+                if (TwoComponentsOfVertices[i].x < xmin)
                 {
-                    xmin = XZofVertices[i].x;
+                    xmin = TwoComponentsOfVertices[i].x;
                 }
-                else if (XZofVertices[i].x > xmax)
+                else if (TwoComponentsOfVertices[i].x > xmax)
                 {
-                    xmax = XZofVertices[i].x;
+                    xmax = TwoComponentsOfVertices[i].x;
                 }
-                else if (XZofVertices[i].y < ymin)
+                else if (TwoComponentsOfVertices[i].y < ymin)
                 {
-                    ymin = XZofVertices[i].y;
+                    ymin = TwoComponentsOfVertices[i].y;
                 }
-                else if (XZofVertices[i].y > ymax)
+                else if (TwoComponentsOfVertices[i].y > ymax)
                 {
-                    ymax = XZofVertices[i].y;
+                    ymax = TwoComponentsOfVertices[i].y;
                 }
             }
 
@@ -201,7 +163,7 @@ namespace SmasherDestruction.Nurikabe.Delanuay
             Vector2[] expandedXZ = new Vector2[3 + vertexCount];
             for (int i = 0; i < vertexCount; i++)
             {
-                expandedXZ[i] = XZofVertices[i];
+                expandedXZ[i] = TwoComponentsOfVertices[i];
             }
 
             expandedXZ[vertexCount] = new Vector2((xmid - 2 * dmax), (ymid - dmax));
@@ -215,7 +177,7 @@ namespace SmasherDestruction.Nurikabe.Delanuay
                 List<DelanuayEdge2D> edges = new();
                 for (int j = 0; j < triangleList.Count; j++)
                 {
-                    if (PointsIsInCircle
+                    if (IsPointsInCircle
                         (
                             expandedXZ[i],
                             expandedXZ[triangleList[j].p1],

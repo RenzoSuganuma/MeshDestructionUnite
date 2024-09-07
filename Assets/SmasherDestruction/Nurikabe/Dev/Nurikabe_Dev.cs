@@ -23,12 +23,12 @@ public class Nurikabe_Dev : UnityEngine.MonoBehaviour
 
     private void Start()
     {
-        Vector2[] xz = new Vector2[_mf.sharedMesh.vertices.Length];
+        Vector2[] xy = new Vector2[_mf.sharedMesh.vertices.Length];
         for (int i = 0; i < _mf.sharedMesh.vertices.Length; i++)
         {
-            xz[i] = new Vector2(_mf.sharedMesh.vertices[i].x, _mf.sharedMesh.vertices[i].z);
+            xy[i] = new Vector2(_mf.sharedMesh.vertices[i].x, _mf.sharedMesh.vertices[i].y);
         }
-        var m = _d.CreateMesh(xz);
+        var m = _d.CreateMeshFromXY(xy);
         var obj = new GameObject();
         var mf = obj.AddComponent<MeshFilter>();
         var mr = obj.AddComponent<MeshRenderer>();
