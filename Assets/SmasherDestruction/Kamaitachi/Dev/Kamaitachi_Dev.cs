@@ -16,7 +16,7 @@ namespace SmasherDestruction.Kamaitachi.Dev
             var vertices = _mf.sharedMesh.vertices;
             for (int i = 0; i < _v3d.Sites.Length; i++)
             {
-                var list = _v3d.Sites[3];
+                var list = _v3d.Sites[i];
                 foreach (var item in list)
                 {
                     var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
