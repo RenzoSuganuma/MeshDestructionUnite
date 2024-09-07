@@ -14,6 +14,23 @@ namespace SmasherDestruction.Kamaitachi.Dev
         {
             _v3d.CreateVoronoi(5, _mf.sharedMesh);
             var vertices = _mf.sharedMesh.vertices;
+
+            // １頂点１領域になるように排他処理
+            for (int i = _v3d.Sites.Length - 1; i >= 0; i--)
+            {
+                // 上塗りを繰り返すような処理をしているので最後に上塗りをしたもの
+                // を先に塗られたものから排除して。。。を繰り返す 
+                var excludeIndices = _v3d.Sites[i];
+                for (int j = i - 1; j >= 0; j--)
+                {
+                    foreach (var index in excludeIndices)
+                    {
+                        _v3d.Sites[j].Remove(index);
+                    }
+                }
+            }
+
+            // 頂点ごとの色をキューブへ割り当て
             for (int i = 0; i < _v3d.Sites.Length; i++)
             {
                 var list = _v3d.Sites[i];
