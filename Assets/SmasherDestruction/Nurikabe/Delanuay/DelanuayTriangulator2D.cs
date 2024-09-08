@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace SmasherDestruction.Nurikabe.Delanuay
@@ -6,13 +7,13 @@ namespace SmasherDestruction.Nurikabe.Delanuay
     /// <summary>
     /// ドロネー三角形を形成する機能を提供するクラス
     /// </summary>
-    public sealed class DelanuayTriangulator
+    public sealed class DelanuayTriangulator2D
     {
         /// <summary>
         /// 円上の頂点で三角形を構成する
         /// </summary>
         /// おそらく 「円周角の定理(共円条件)の逆」を利用している
-        public bool PointsIsInCircle
+        public bool IsPointsInCircle
             (Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4)
         {
             // 渡された三角形を構成する辺のうち２つの長さが0に近いときは三角形が構成できない
@@ -27,7 +28,7 @@ namespace SmasherDestruction.Nurikabe.Delanuay
             // xc,yc = 外周円の中点
             float m1, m2, mx1, mx2, my1, my2, xc, yc;
 
-            // 三角形のうち１つの辺の長さが0なら:P1
+            // 三角形のうち１つの辺の長さが0なら
             if (Mathf.Abs(p2.y - p1.y) < float.Epsilon)
             {
                 m2 = -(p3.x - p2.x) / (p3.y - p2.y); // 垂直二等分線の傾き = -1 * 辺の傾き
@@ -35,7 +36,7 @@ namespace SmasherDestruction.Nurikabe.Delanuay
                 my2 = (p2.y + p3.y) * .5f;
                 xc = (p2.x + p1.x) * .5f;
                 yc = m2 * (xc - mx2) + my2;
-            } // :P2
+            }
             else if (Mathf.Abs(p3.y - p2.y) < float.Epsilon)
             {
                 m1 = -(p2.x - p1.x) / (p2.y - p1.y);
@@ -79,10 +80,14 @@ namespace SmasherDestruction.Nurikabe.Delanuay
             dy = p1.y - yc;
             double dsqr = dx * dx + dy * dy;
 
-            return (dsqr <= rsqr); // p1,p2が同じ外接円の円周上にあるならばその円の中点との距離は p1,p2ともに等しい値である
+            // p1,p2が同じ外接円の円周上にあるならばその円の中点との距離は p1,p2ともに等しい値である
+            return (dsqr <= rsqr);
         }
 
-        public void CreateInfluencePolygon(Vector2[] XZofVertices)
+        /// <summary>
+        /// 頂点群【X,Z成分を抽出したもの】から三角形分割をしたメッシュを生成する
+        /// </summary>
+        public Mesh CreateMeshFromXZ(Vector2[] XZofVertices)
         {
             Vector3[] vertices = new Vector3[XZofVertices.Length];
             for (int i = 0; i < XZofVertices.Length; i++)
@@ -90,68 +95,63 @@ namespace SmasherDestruction.Nurikabe.Delanuay
                 vertices[i] = new Vector3(XZofVertices[i].x, 0, XZofVertices[i].y);
             }
 
-            foreach (var v in vertices)
-            {
-                var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                cube.transform.position = v;
-                cube.transform.localScale = Vector3.one * .5f;
-            }
+            var mesh = new Mesh();
+            mesh.vertices = vertices;
+            mesh.uv = XZofVertices;
+            mesh.triangles = TriangulatePolygon(XZofVertices);
+            mesh.RecalculateNormals();
 
-            // ポリゴンとして構成できる頂点インデックス配列を返す。
-            var polygon = TriangulatePolygon(XZofVertices);
-
-            for (int i = 0; i < polygon.Length - 3; i += 3)
-            {
-                GameObject obj1 = new GameObject($"Mesh{i + 1}");
-                GameObject obj2 = new GameObject($"Mesh{i + 2}");
-                GameObject obj3 = new GameObject($"Mesh{i + 3}");
-                var p1 = vertices[polygon[i]];
-                var p2 = vertices[polygon[i + 1]];
-                var p3 = vertices[polygon[i + 2]];
-
-                var lr = obj1.AddComponent<LineRenderer>();
-                float w = .1f;
-                lr.startWidth = w;
-                lr.endWidth = w;
-                lr.SetPositions(new[] { p1, p2 });
-
-                lr = obj2.AddComponent<LineRenderer>();
-                lr.startWidth = w;
-                lr.endWidth = w;
-                lr.SetPositions(new[] { p2, p3 });
-
-                lr = obj3.AddComponent<LineRenderer>();
-                lr.startWidth = w;
-                lr.endWidth = w;
-                lr.SetPositions(new[] { p3, p1 });
-            }
+            return mesh;
         }
 
-        public int[] TriangulatePolygon(Vector2[] XZofVertices)
+        /// <summary>
+        /// 頂点群【X,Y成分を抽出したもの】から三角形分割をしたメッシュを生成する
+        /// </summary>
+        public Mesh CreateMeshFromXY(Vector2[] XYofVertices)
         {
-            int vertexCount = XZofVertices.Length;
-            float xmin = XZofVertices[0].x;
-            float ymin = XZofVertices[0].y;
+            Vector3[] vertices = new Vector3[XYofVertices.Length];
+            for (int i = 0; i < XYofVertices.Length; i++)
+            {
+                vertices[i] = new Vector3(XYofVertices[i].x, XYofVertices[i].y, 0);
+            }
+
+            var mesh = new Mesh();
+            mesh.vertices = vertices;
+            mesh.uv = XYofVertices;
+            mesh.triangles = TriangulatePolygon(XYofVertices);
+            mesh.RecalculateNormals();
+
+            return mesh;
+        }
+
+        /// <summary>
+        /// 頂点群【2成分を抽出したもの】から三角形分割をする
+        /// </summary>
+        public int[] TriangulatePolygon(Vector2[] TwoComponentsOfVertices)
+        {
+            int vertexCount = TwoComponentsOfVertices.Length;
+            float xmin = TwoComponentsOfVertices[0].x;
+            float ymin = TwoComponentsOfVertices[0].y;
             float xmax = xmin;
             float ymax = ymin;
 
             for (int i = 1; i < vertexCount; i++)
             {
-                if (XZofVertices[i].x < xmin)
+                if (TwoComponentsOfVertices[i].x < xmin)
                 {
-                    xmin = XZofVertices[i].x;
+                    xmin = TwoComponentsOfVertices[i].x;
                 }
-                else if (XZofVertices[i].x > xmax)
+                else if (TwoComponentsOfVertices[i].x > xmax)
                 {
-                    xmax = XZofVertices[i].x;
+                    xmax = TwoComponentsOfVertices[i].x;
                 }
-                else if (XZofVertices[i].y < ymin)
+                else if (TwoComponentsOfVertices[i].y < ymin)
                 {
-                    ymin = XZofVertices[i].y;
+                    ymin = TwoComponentsOfVertices[i].y;
                 }
-                else if (XZofVertices[i].y > ymax)
+                else if (TwoComponentsOfVertices[i].y > ymax)
                 {
-                    ymax = XZofVertices[i].y;
+                    ymax = TwoComponentsOfVertices[i].y;
                 }
             }
 
@@ -163,21 +163,21 @@ namespace SmasherDestruction.Nurikabe.Delanuay
             Vector2[] expandedXZ = new Vector2[3 + vertexCount];
             for (int i = 0; i < vertexCount; i++)
             {
-                expandedXZ[i] = XZofVertices[i];
+                expandedXZ[i] = TwoComponentsOfVertices[i];
             }
 
             expandedXZ[vertexCount] = new Vector2((xmid - 2 * dmax), (ymid - dmax));
             expandedXZ[vertexCount + 1] = new Vector2(xmid, (ymid + 2 * dmax));
             expandedXZ[vertexCount + 2] = new Vector2((xmid + 2 * dmax), (ymid - dmax));
-            List<DelanuayTriangle> triangleList = new();
+            List<DelanuayTriangle2D> triangleList = new();
             triangleList.Add(
-                new DelanuayTriangle(vertexCount, vertexCount + 1, vertexCount + 2));
+                new DelanuayTriangle2D(vertexCount, vertexCount + 1, vertexCount + 2));
             for (int i = 0; i < vertexCount; i++)
             {
-                List<DelanuayEdge> edges = new();
+                List<DelanuayEdge2D> edges = new();
                 for (int j = 0; j < triangleList.Count; j++)
                 {
-                    if (PointsIsInCircle
+                    if (IsPointsInCircle
                         (
                             expandedXZ[i],
                             expandedXZ[triangleList[j].p1],
@@ -185,9 +185,9 @@ namespace SmasherDestruction.Nurikabe.Delanuay
                             expandedXZ[triangleList[j].p3]
                         ))
                     {
-                        edges.Add(new DelanuayEdge(triangleList[j].p1, triangleList[j].p2));
-                        edges.Add(new DelanuayEdge(triangleList[j].p2, triangleList[j].p3));
-                        edges.Add(new DelanuayEdge(triangleList[j].p3, triangleList[j].p1));
+                        edges.Add(new DelanuayEdge2D(triangleList[j].p1, triangleList[j].p2));
+                        edges.Add(new DelanuayEdge2D(triangleList[j].p2, triangleList[j].p3));
+                        edges.Add(new DelanuayEdge2D(triangleList[j].p3, triangleList[j].p1));
                         triangleList.RemoveAt(j);
                         j--;
                     }
@@ -214,7 +214,7 @@ namespace SmasherDestruction.Nurikabe.Delanuay
 
                 for (int j = 0; j < edges.Count; j++)
                 {
-                    triangleList.Add(new DelanuayTriangle(edges[j].p1, edges[j].p2, i));
+                    triangleList.Add(new DelanuayTriangle2D(edges[j].p1, edges[j].p2, i));
                 }
 
                 edges.Clear();
