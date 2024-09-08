@@ -63,8 +63,6 @@ namespace SmasherDestruction.Kamaitachi.Voronoi
                 _borderVertices[i] = new List<int>();
             }
 
-            Debug.Log($"{_borderVertices.Length}");
-
             // 境界線にある頂点を検索し、有ればその頂点のインデックスをまとめている配列へ追加
             var vertices = mesh.vertices;
             var triangles = mesh.triangles;
@@ -73,39 +71,24 @@ namespace SmasherDestruction.Kamaitachi.Voronoi
             {
                 // インデックスが範囲外を指定してしまうため、循環するように余りを使う。
                 var p1 = FindSite(_sites, i);
-                var p2 = FindSite(_sites, i + 1);
-                var p3 = FindSite(_sites, i + 2);
-                if (p1 < 0 || p1 > _sites.Length - 1)
-                {
-                    p1 = Mathf.Clamp(p1, 0, _sites.Length - 1);
-                } // p1 clamping 
+                var p2 = FindSite(_sites, i + 1 % vertices.Length);
+                var p3 = FindSite(_sites, i + 2 % vertices.Length);
+                Debug.Log($"クランプ前 p1 = {p1},p2 = {p2}, p3 = {p3}");
 
-                if (p2 < 0 || p2 > _sites.Length - 1)
+                if (p1 is not -1)
+                    _borderVertices[p1].Add(i);
+                if (p2 is not -1)
+                    _borderVertices[p2].Add(i + 1 % vertices.Length);
+                if (p3 is not -1)
+                    _borderVertices[p3].Add(i + 2 % vertices.Length);
+                if ((p1 is not -1) && (p1 < _sites.Length - 1) && (p1 != p2 || p1 != p3)) // p1
                 {
-                    p2 = Mathf.Clamp(p2, 0, _sites.Length - 1);
-                } // p2 clamping 
-
-                if (p3 < 0 || p3 > _sites.Length - 1)
-                {
-                    p3 = Mathf.Clamp(p3, 0, _sites.Length - 1);
-                } // p3 clamping
-
-                if ((p1 is not -1) && p1 != p2 && p1 != p3) // p1
-                {
-                    var ind = Mathf.Clamp(i, 0, vertices.Length - 1);
-                    _borderVertices[p1].Add(ind);
-                }
-
-                if ((p2 is not -1) && p2 != p1 && p2 != p3) // p2
-                {
-                    var ind = Mathf.Clamp(i + 1, 0, vertices.Length - 1);
-                    _borderVertices[p2].Add(ind);
-                }
-
-                if ((p3 is not -1) && p3 != p1 && p3 != p2) // p3
-                {
-                    var ind = Mathf.Clamp(i + 2, 0, vertices.Length - 1);
-                    _borderVertices[p3].Add(ind);
+                    if ((p2 is not -1) && (p2 < _sites.Length - 1) && (p2 != p1 || p2 != p3)) // p2
+                    {
+                        if ((p3 is not -1) && (p3 < _sites.Length - 1) && (p3 != p1 || p3 != p2)) // p3
+                        {
+                        }
+                    }
                 }
             }
         }
@@ -117,11 +100,11 @@ namespace SmasherDestruction.Kamaitachi.Voronoi
         {
             int ret = -1;
 
-            foreach (var site in sites)
+            for (int i = 0; i < sites.Length; i++)
             {
-                if (site.Contains(vertexIndex))
+                if (sites[i].Contains(vertexIndex))
                 {
-                    ret = vertexIndex;
+                    ret = i;
                     break;
                 }
             }
