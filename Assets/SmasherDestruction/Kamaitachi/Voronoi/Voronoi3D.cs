@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem.Layouts;
 using Random = UnityEngine.Random;
 
 namespace SmasherDestruction.Kamaitachi.Voronoi
@@ -21,7 +22,17 @@ namespace SmasherDestruction.Kamaitachi.Voronoi
         /// </summary>
         private List<int>[] _sites = new List<int>[] { };
 
+        /// <summary>
+        /// [母点のインデックス]{それに対応した色}
+        /// </summary>
         private List<Color> _colors = new();
+
+        /// <summary>
+        /// [母点のインデックス]{頂点番号の配列}
+        /// </summary>
+        private List<int>[] _borderVertices = new List<int>[] { };
+
+        public List<int>[] BorderVertices => _borderVertices;
 
         public List<int>[] Sites => _sites;
 
@@ -44,12 +55,96 @@ namespace SmasherDestruction.Kamaitachi.Voronoi
         {
             CreatePointAndColor(count, mesh);
             CreateSites(mesh);
+            EraseDuplicatedVertices();
+
+            _borderVertices = new List<int>[_sites.Length];
+            for (int i = 0; i < _sites.Length; i++)
+            {
+                _borderVertices[i] = new List<int>();
+            }
+
+            Debug.Log($"{_borderVertices.Length}");
+
+            // 境界線にある頂点を検索し、有ればその頂点のインデックスをまとめている配列へ追加
+            var vertices = mesh.vertices;
+            var triangles = mesh.triangles;
+
+            for (int i = 0; i < triangles.Length; i += 3)
+            {
+                // インデックスが範囲外を指定してしまうため、循環するように余りを使う。
+                var p1 = FindSite(_sites, i);
+                var p2 = FindSite(_sites, i + 1);
+                var p3 = FindSite(_sites, i + 2);
+                if (p1 < 0 || p1 > _sites.Length - 1)
+                {
+                    p1 = Mathf.Clamp(p1, 0, _sites.Length - 1);
+                } // p1 clamping 
+
+                if (p2 < 0 || p2 > _sites.Length - 1)
+                {
+                    p2 = Mathf.Clamp(p2, 0, _sites.Length - 1);
+                } // p2 clamping 
+
+                if (p3 < 0 || p3 > _sites.Length - 1)
+                {
+                    p3 = Mathf.Clamp(p3, 0, _sites.Length - 1);
+                } // p3 clamping
+
+                if ((p1 is not -1) && p1 != p2 && p1 != p3) // p1
+                {
+                    var ind = Mathf.Clamp(i, 0, vertices.Length - 1);
+                    _borderVertices[p1].Add(ind);
+                }
+
+                if ((p2 is not -1) && p2 != p1 && p2 != p3) // p2
+                {
+                    var ind = Mathf.Clamp(i + 1, 0, vertices.Length - 1);
+                    _borderVertices[p2].Add(ind);
+                }
+
+                if ((p3 is not -1) && p3 != p1 && p3 != p2) // p3
+                {
+                    var ind = Mathf.Clamp(i + 2, 0, vertices.Length - 1);
+                    _borderVertices[p3].Add(ind);
+                }
+            }
         }
 
-        public string GetInformation()
+        /// <summary>
+        /// 領域のインデックスを返す
+        /// </summary>
+        private int FindSite(List<int>[] sites, int vertexIndex)
         {
-            return $"Points Count:{_points.Count}\n" +
-                   $"Sites Count:{_sites.Length}";
+            int ret = -1;
+
+            foreach (var site in sites)
+            {
+                if (site.Contains(vertexIndex))
+                {
+                    ret = vertexIndex;
+                    break;
+                }
+            }
+
+            return ret;
+        }
+
+        private void EraseDuplicatedVertices()
+        {
+            // １頂点１領域になるように排他処理
+            for (int i = _sites.Length - 1; i >= 0; i--)
+            {
+                // 上塗りを繰り返すような処理をしているので最後に上塗りをしたもの
+                // を先に塗られたものから排除して。。。を繰り返す 
+                var excludeIndices = _sites[i];
+                for (int j = i - 1; j >= 0; j--)
+                {
+                    foreach (var index in excludeIndices)
+                    {
+                        _sites[j].Remove(index);
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -181,6 +276,7 @@ namespace SmasherDestruction.Kamaitachi.Voronoi
                 var vertex = vertices[i];
                 ind = -1;
                 dmin = Int32.MaxValue;
+
                 // 各母点に対してループ
                 for (int k = 0; k < _points.Count; k++)
                 {
@@ -206,10 +302,6 @@ namespace SmasherDestruction.Kamaitachi.Voronoi
                     }
                 }
             }
-
-            int dbIndex = 4;
-            if (_sites[dbIndex] is not null)
-                _sites[dbIndex].ForEach(o => Debug.Log(o + ","));
         }
 
         /// <summary>

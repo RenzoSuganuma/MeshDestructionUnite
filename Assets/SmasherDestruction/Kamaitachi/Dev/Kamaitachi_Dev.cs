@@ -32,15 +32,27 @@ namespace SmasherDestruction.Kamaitachi.Dev
             }
 
             // 頂点ごとの色をキューブへ割り当て
-            for (int i = 0; i < _v3d.Sites.Length; i++)
+            // for (int i = 0; i < _v3d.Sites.Length; i++)
+            // {
+            //     var list = _v3d.Sites[i];
+            //     foreach (var item in list)
+            //     {
+            //         var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            //         cube.transform.localPosition = vertices[item];
+            //         cube.transform.localScale = Vector3.one * .05f;
+            //         cube.GetComponent<MeshRenderer>().material.color = _v3d.Colors[i];
+            //     }
+            // }
+
+            for (int i = 0; i < _v3d.BorderVertices.Length; i++)
             {
-                var list = _v3d.Sites[i];
+                var list = _v3d.BorderVertices[i];
                 foreach (var item in list)
                 {
                     var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
                     cube.transform.localPosition = vertices[item];
                     cube.transform.localScale = Vector3.one * .05f;
-                    cube.GetComponent<MeshRenderer>().material.color = _v3d.Colors[i];
+                    cube.GetComponent<MeshRenderer>().material.color = Color.black;
                 }
             }
         }
