@@ -9,9 +9,9 @@ namespace SmasherDestruction.Datas
     {
         public Vector3 Position;
         public Vector3 Normal;
-        public Vector3 Uv;
+        public Vector2 Uv;
 
-        public MeshVertex(Vector3 position, Vector3 normal, Vector3 uv)
+        public MeshVertex(Vector3 position, Vector3 normal, Vector2 uv)
         {
             this.Position = position;
             this.Normal = normal;
