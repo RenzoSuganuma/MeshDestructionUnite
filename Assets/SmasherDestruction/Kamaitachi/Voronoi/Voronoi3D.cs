@@ -57,7 +57,11 @@ namespace SmasherDestruction.Kamaitachi.Voronoi
             CreatePointAndColor(count, mesh);
             CreateSites(mesh);
             EraseDuplicatedVertices();
+            FindBorderVertices(mesh);
+        }
 
+        private void FindBorderVertices(Mesh mesh)
+        {
             // 境い目の頂点を格納しておく配列の初期化はここでやる。領域の配列の初期化の後に必ず実行。:_sitesのプロパティを参照しているから
             _borderVertices = new List<int>[_sites.Length];
             for (int i = 0; i < _sites.Length; i++)
@@ -68,24 +72,19 @@ namespace SmasherDestruction.Kamaitachi.Voronoi
             // 同じ母点に属している頂点が構成する三角形以外の三角形が境目の三角形
             for (int i = 0; i < mesh.triangles.Length; i += 3)
             {
-                var p1 = FindSite(_sites, mesh.triangles[i]);
-                var p2 = FindSite(_sites, mesh.triangles[i + 1]);
-                var p3 = FindSite(_sites, mesh.triangles[i + 2]);
-
-                Debug.Log($"vert:{mesh.triangles[i]}, p1:{p1}, p2:{p2}, p3:{p3}");
             }
         }
 
         /// <summary>
         /// 領域のインデックスを返す。見つからなかったら -1を返す。
         /// </summary>
-        private int FindSite(List<int>[] sites, int vertexIndex)
+        private int FindSite(int vertexIndex)
         {
             int ret = -1;
 
-            for (int i = sites.Length - 1; i >= 0; i--)
+            for (int i = _sites.Length - 1; i >= 0; i--)
             {
-                if (sites[i].Contains(vertexIndex))
+                if (_sites[i].Contains(vertexIndex))
                 {
                     ret = i;
                 }
@@ -234,6 +233,11 @@ namespace SmasherDestruction.Kamaitachi.Voronoi
             for (int i = 0; i < _sites.Length; i++)
             {
                 _sites[i] = new List<int>();
+            }
+
+            for (int i = 0; i < _sites.Length; i++)
+            {
+                var ind_vert = i % _sites.Length;
             }
 
             for (int i = 0; i < vertices.Length; i++)
