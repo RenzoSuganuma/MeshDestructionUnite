@@ -1,93 +1,106 @@
+using SmasherDestruction.Datas;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace SmasherDestruction.Editor
 {
-    /// <summary> メッシュ切断機能を提供する。 </summary>
+    /// <summary>
+    /// メッシュ切断機能を提供する。
+    /// </summary>
     // Ver 1.0.0
     public static class Tsujigiri
     {
-        private static CuttedMesh _leftCuttedMesh = new CuttedMesh();
-        private static CuttedMesh _rightCuttedMesh = new CuttedMesh();
-        private static Plane _blade;
         private static Mesh _victimMesh;
+        private static SlicedMesh _topSlicedMesh = new();
+        private static SlicedMesh _bottomSlicedMesh = new();
         private static List<Vector3> _newVertices = new List<Vector3>();
+        private static Plane _blade;
 
         /// <summary>
         /// メッシュを切断し、切断されたメッシュを返す ラッパーメソッド
         /// </summary>
-        /// <param name="victim">切断対象のゲームオブジェクト</param>
+        /// <param name="sourceObject">切断対象のゲームオブジェクト</param>
         /// <param name="anchorPos">切断面のアンカー位置</param>
         /// <param name="normalDir">切断面の法線</param>
         /// <param name="capMat">切断面のマテリアル</param>
         /// <returns></returns>
-        public static GameObject[] CutMesh(GameObject victim, Vector3 anchorPos, Vector3 normalDir, Material capMat,
+        public static GameObject[] CutMesh(
+            GameObject sourceObject,
+            Vector3 anchorPos,
+            Vector3 normalDir,
+            Material capMat,
             bool makeGap)
         {
             // 対象のローカル座標から平面を生成
             _blade = new Plane(
-                victim.transform.InverseTransformDirection(-normalDir),
-                victim.transform.InverseTransformPoint(anchorPos)
+                // 切断面の法線、ローカルポジションを初期化
+                sourceObject.transform.InverseTransformDirection(-normalDir),
+                sourceObject.transform.InverseTransformPoint(anchorPos)
             );
 
-            _victimMesh = victim.GetComponent<MeshFilter>().sharedMesh;
+            _victimMesh = sourceObject.GetComponent<MeshFilter>().sharedMesh;
+
             // 左右に分離したメッシュデータ、新しく追加した頂点群をクリア
             _newVertices.Clear();
-            _leftCuttedMesh.ClearAll();
-            _rightCuttedMesh.ClearAll();
+            _topSlicedMesh.ClearAll();
+            _bottomSlicedMesh.ClearAll();
 
-            bool[] sides = new bool[3]; // 平面の左右にあるかのフラグ
+            // 平面の左右に頂点v1,v2,v3があるかのフラグ
+            bool[] sides = new bool[3];
+            // サブメッシュの頂点インデックス配列
             int[] indices;
-            int p0, p1, p2;
+            // ３頂点
+            int v1, v2, v3;
 
             // サブメッシュの数だけループして切断処理をする
+            // ループをしないと、しっかり切れたことにならないから切っておく
             for (int submesh = 0; submesh < _victimMesh.subMeshCount; submesh++)
             {
                 indices = _victimMesh.GetIndices(submesh);
 
                 // サブメッシュ１つ分のインデックスリスト
-                _leftCuttedMesh.SubIndices.Add(new List<int>());
-                _rightCuttedMesh.SubIndices.Add(new List<int>());
+                _topSlicedMesh.SubIndices.Add(new List<int>());
+                _bottomSlicedMesh.SubIndices.Add(new List<int>());
 
                 // サブメッシュのインデックス数分ループ
                 for (int i = 0; i < indices.Length; i += 3)
                 {
-                    p0 = indices[i];
-                    p1 = indices[i + 1];
-                    p2 = indices[i + 2];
+                    v1 = indices[i];
+                    v2 = indices[i + 1];
+                    v3 = indices[i + 2];
 
-                    // 頂点が平面の左右にあるか判定する。右にあるなら false
-                    sides[0] = _blade.GetSide(_victimMesh.vertices[p0]);
-                    sides[1] = _blade.GetSide(_victimMesh.vertices[p1]);
-                    sides[2] = _blade.GetSide(_victimMesh.vertices[p2]);
+                    // 頂点が平面の面の上にあるか判定。あるなら真
+                    sides[0] = _blade.GetSide(_victimMesh.vertices[v1]);
+                    sides[1] = _blade.GetSide(_victimMesh.vertices[v2]);
+                    sides[2] = _blade.GetSide(_victimMesh.vertices[v3]);
 
-                    // すべて切断面の左右にある場合には切断処理をしない
+                    // すべての頂点が切断面の上にある場合には切断処理をしない
                     if (sides[0] == sides[1] && sides[0] == sides[2])
                     {
                         // 左右にあるかに応じ、トライアングルの追加
                         if (sides[0])
                         {
-                            _leftCuttedMesh.AddTriangle(p0, p1, p2, submesh, ref _victimMesh);
+                            _topSlicedMesh.AddTriangle(v1, v2, v3, submesh, ref _victimMesh);
                         }
                         else
                         {
-                            _rightCuttedMesh.AddTriangle(p0, p1, p2, submesh, ref _victimMesh);
+                            _bottomSlicedMesh.AddTriangle(v1, v2, v3, submesh, ref _victimMesh);
                         }
                     }
-                    else
+                    else // 切断面の上下にある場合には切断処理
                     {
                         // 切断をする
-                        CutThisFace(submesh, sides, p0, p1, p2);
+                        CutThisFace(submesh, sides, v1, v2, v3);
                     }
                 }
             }
 
-            Material[] materials = victim.GetComponent<MeshRenderer>().sharedMaterials;
+            Material[] materials = sourceObject.GetComponent<MeshRenderer>().sharedMaterials;
 
             if (materials[materials.Length - 1].name != capMat.name)
             {
-                _leftCuttedMesh.SubIndices.Add(new List<int>());
-                _rightCuttedMesh.SubIndices.Add(new List<int>());
+                _topSlicedMesh.SubIndices.Add(new List<int>());
+                _bottomSlicedMesh.SubIndices.Add(new List<int>());
 
                 Material[] newMaterials = new Material[materials.Length + 1];
 
@@ -104,41 +117,41 @@ namespace SmasherDestruction.Editor
             // 左側のメッシュを生成
             Mesh leftHalfMesh = new Mesh();
             leftHalfMesh.name = "Left Splitted";
-            leftHalfMesh.vertices = _leftCuttedMesh.Vertices.ToArray();
-            leftHalfMesh.triangles = _leftCuttedMesh.Triangles.ToArray();
-            leftHalfMesh.normals = _leftCuttedMesh.Normals.ToArray();
-            leftHalfMesh.uv = _leftCuttedMesh.UVs.ToArray();
+            leftHalfMesh.vertices = _topSlicedMesh.Vertices.ToArray();
+            leftHalfMesh.triangles = _topSlicedMesh.Triangles.ToArray();
+            leftHalfMesh.normals = _topSlicedMesh.Normals.ToArray();
+            leftHalfMesh.uv = _topSlicedMesh.UVs.ToArray();
 
-            leftHalfMesh.subMeshCount = _leftCuttedMesh.SubIndices.Count;
-            for (int i = 0; i < _leftCuttedMesh.SubIndices.Count; i++)
+            leftHalfMesh.subMeshCount = _topSlicedMesh.SubIndices.Count;
+            for (int i = 0; i < _topSlicedMesh.SubIndices.Count; i++)
             {
-                leftHalfMesh.SetIndices(_leftCuttedMesh.SubIndices[i].ToArray(), MeshTopology.Triangles, i);
+                leftHalfMesh.SetIndices(_topSlicedMesh.SubIndices[i].ToArray(), MeshTopology.Triangles, i);
             }
 
             // 右側のメッシュを生成
             Mesh rightHalfMesh = new Mesh();
             rightHalfMesh.name = "Right Splitted";
-            rightHalfMesh.vertices = _rightCuttedMesh.Vertices.ToArray();
-            rightHalfMesh.triangles = _rightCuttedMesh.Triangles.ToArray();
-            rightHalfMesh.normals = _rightCuttedMesh.Normals.ToArray();
-            rightHalfMesh.uv = _rightCuttedMesh.UVs.ToArray();
+            rightHalfMesh.vertices = _bottomSlicedMesh.Vertices.ToArray();
+            rightHalfMesh.triangles = _bottomSlicedMesh.Triangles.ToArray();
+            rightHalfMesh.normals = _bottomSlicedMesh.Normals.ToArray();
+            rightHalfMesh.uv = _bottomSlicedMesh.UVs.ToArray();
 
-            rightHalfMesh.subMeshCount = _rightCuttedMesh.SubIndices.Count;
-            for (int i = 0; i < _rightCuttedMesh.SubIndices.Count; i++)
+            rightHalfMesh.subMeshCount = _bottomSlicedMesh.SubIndices.Count;
+            for (int i = 0; i < _bottomSlicedMesh.SubIndices.Count; i++)
             {
-                rightHalfMesh.SetIndices(_rightCuttedMesh.SubIndices[i].ToArray(), MeshTopology.Triangles, i);
+                rightHalfMesh.SetIndices(_bottomSlicedMesh.SubIndices[i].ToArray(), MeshTopology.Triangles, i);
             }
 
             // 元のオブジェクトを左側に
-            victim.name = "Left Side";
-            victim.GetComponent<MeshFilter>().mesh = leftHalfMesh;
+            sourceObject.name = "Left Side";
+            sourceObject.GetComponent<MeshFilter>().mesh = leftHalfMesh;
 
             // 右側は生成
-            GameObject leftObj = victim;
+            GameObject leftObj = sourceObject;
 
             GameObject rightObj = new GameObject("Right Side", typeof(MeshFilter), typeof(MeshRenderer));
-            rightObj.transform.position = victim.transform.position;
-            rightObj.transform.rotation = victim.transform.rotation;
+            rightObj.transform.position = sourceObject.transform.position;
+            rightObj.transform.rotation = sourceObject.transform.rotation;
             rightObj.GetComponent<MeshFilter>().mesh = rightHalfMesh;
 
             leftObj.GetComponent<MeshRenderer>().materials = materials;
@@ -261,7 +274,7 @@ namespace SmasherDestruction.Editor
             // トライアングル
             // 左側
             // 【縮退三角形的に追加】
-            _leftCuttedMesh.AddTriangle(
+            _topSlicedMesh.AddTriangle(
                 new Vector3[] { leftPoints[0], newVertex1, newVertex2 },
                 new Vector3[] { leftNormals[0], newNormal1, newNormal2 },
                 new Vector2[] { leftUVs[0], newUv1, newUv2 },
@@ -269,7 +282,7 @@ namespace SmasherDestruction.Editor
                 subMesh
             );
 
-            _leftCuttedMesh.AddTriangle(
+            _topSlicedMesh.AddTriangle(
                 new Vector3[] { leftPoints[0], leftPoints[1], newVertex2 },
                 new Vector3[] { leftNormals[0], leftNormals[1], newNormal2 },
                 new Vector2[] { leftUVs[0], leftUVs[1], newUv2 },
@@ -278,7 +291,7 @@ namespace SmasherDestruction.Editor
             );
 
             // 右側
-            _rightCuttedMesh.AddTriangle(
+            _bottomSlicedMesh.AddTriangle(
                 new Vector3[] { rightPoints[0], newVertex1, newVertex2 },
                 new Vector3[] { rightNormals[0], newNormal1, newNormal2 },
                 new Vector2[] { rightUVs[0], newUv1, newUv2 },
@@ -286,7 +299,7 @@ namespace SmasherDestruction.Editor
                 subMesh
             );
 
-            _rightCuttedMesh.AddTriangle(
+            _bottomSlicedMesh.AddTriangle(
                 new Vector3[] { rightPoints[0], rightPoints[1], newVertex2 },
                 new Vector3[] { rightNormals[0], rightNormals[1], newNormal2 },
                 new Vector2[] { rightUVs[0], rightUVs[1], newUv2 },
@@ -399,7 +412,7 @@ namespace SmasherDestruction.Editor
                 newUv2.y = .5f + Vector3.Dot(displacement, upward);
                 newUv2.z = .5f + Vector3.Dot(displacement, _blade.normal);
 
-                _leftCuttedMesh.AddTriangle(
+                _topSlicedMesh.AddTriangle(
                     new Vector3[]
                     {
                         verts[i],
@@ -420,10 +433,10 @@ namespace SmasherDestruction.Editor
                     },
                     -_blade.normal,
                     // カット面をサブメッシュとして登録
-                    _leftCuttedMesh.SubIndices.Count - 1
+                    _topSlicedMesh.SubIndices.Count - 1
                 );
 
-                _rightCuttedMesh.AddTriangle(
+                _bottomSlicedMesh.AddTriangle(
                     new Vector3[]
                     {
                         verts[i],
@@ -444,7 +457,7 @@ namespace SmasherDestruction.Editor
                     },
                     _blade.normal,
                     // カット面をサブメッシュとして登録
-                    _rightCuttedMesh.SubIndices.Count - 1
+                    _bottomSlicedMesh.SubIndices.Count - 1
                 );
             }
         }
