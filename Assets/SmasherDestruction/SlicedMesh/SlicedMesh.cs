@@ -141,5 +141,26 @@ namespace SmasherDestruction.Datas
             UVs.Add(uvs3[v2]);
             UVs.Add(uvs3[v3]);
         }
+
+        /// <summary>
+        /// すでに格納されている情報からメッシュとしてデータを生成する。
+        /// </summary>
+        /// <returns></returns>
+        public Mesh ToMesh()
+        {
+            Mesh halfMesh = new Mesh();
+            halfMesh.name = $"SplittedMesh:{GetHashCode()}";
+            halfMesh.vertices = this.Vertices.ToArray();
+            halfMesh.triangles = this.Triangles.ToArray();
+            halfMesh.normals = this.Normals.ToArray();
+            halfMesh.uv = this.UVs.ToArray();
+            halfMesh.subMeshCount = this.SubIndices.Count;
+            for (int i = 0; i < this.SubIndices.Count; i++)
+            {
+                halfMesh.SetIndices(this.SubIndices[i].ToArray(), MeshTopology.Triangles, i);
+            }
+
+            return halfMesh;
+        }
     }
 }

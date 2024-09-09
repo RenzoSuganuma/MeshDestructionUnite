@@ -13,7 +13,7 @@ namespace SmasherDestruction.Editor
         private static Mesh _victimMesh;
         private static SlicedMesh _topSlicedMesh = new();
         private static SlicedMesh _bottomSlicedMesh = new();
-        private static List<Vector3> _newVertices = new List<Vector3>();
+        private static List<Vector3> _newVerticesPos = new List<Vector3>();
         private static Plane _blade;
 
         /// <summary>
@@ -41,7 +41,7 @@ namespace SmasherDestruction.Editor
             _victimMesh = sourceObject.GetComponent<MeshFilter>().sharedMesh;
 
             // 左右に分離したメッシュデータ、新しく追加した頂点群をクリア
-            _newVertices.Clear();
+            _newVerticesPos.Clear();
             _topSlicedMesh.ClearAll();
             _bottomSlicedMesh.ClearAll();
 
@@ -115,46 +115,47 @@ namespace SmasherDestruction.Editor
             Capping();
 
             // 左側のメッシュを生成
-            Mesh leftHalfMesh = new Mesh();
-            leftHalfMesh.name = "Left Splitted";
-            leftHalfMesh.vertices = _topSlicedMesh.Vertices.ToArray();
-            leftHalfMesh.triangles = _topSlicedMesh.Triangles.ToArray();
-            leftHalfMesh.normals = _topSlicedMesh.Normals.ToArray();
-            leftHalfMesh.uv = _topSlicedMesh.UVs.ToArray();
-
-            leftHalfMesh.subMeshCount = _topSlicedMesh.SubIndices.Count;
-            for (int i = 0; i < _topSlicedMesh.SubIndices.Count; i++)
-            {
-                leftHalfMesh.SetIndices(_topSlicedMesh.SubIndices[i].ToArray(), MeshTopology.Triangles, i);
-            }
-
+            /* ToMeshメソッドを実装した。これがまともに動くか要動作確認 */
+            // Mesh leftHalfMesh = new Mesh();
+            // leftHalfMesh.name = "Left Splitted";
+            // leftHalfMesh.vertices = _topSlicedMesh.Vertices.ToArray();
+            // leftHalfMesh.triangles = _topSlicedMesh.Triangles.ToArray();
+            // leftHalfMesh.normals = _topSlicedMesh.Normals.ToArray();
+            // leftHalfMesh.uv = _topSlicedMesh.UVs.ToArray();
+            // leftHalfMesh.subMeshCount = _topSlicedMesh.SubIndices.Count;
+            // for (int i = 0; i < _topSlicedMesh.SubIndices.Count; i++)
+            // {
+            //     leftHalfMesh.SetIndices(_topSlicedMesh.SubIndices[i].ToArray(), MeshTopology.Triangles, i);
+            // }
+            var leftHalfMesh = _topSlicedMesh.ToMesh();
             // 右側のメッシュを生成
-            Mesh rightHalfMesh = new Mesh();
-            rightHalfMesh.name = "Right Splitted";
-            rightHalfMesh.vertices = _bottomSlicedMesh.Vertices.ToArray();
-            rightHalfMesh.triangles = _bottomSlicedMesh.Triangles.ToArray();
-            rightHalfMesh.normals = _bottomSlicedMesh.Normals.ToArray();
-            rightHalfMesh.uv = _bottomSlicedMesh.UVs.ToArray();
-
-            rightHalfMesh.subMeshCount = _bottomSlicedMesh.SubIndices.Count;
-            for (int i = 0; i < _bottomSlicedMesh.SubIndices.Count; i++)
-            {
-                rightHalfMesh.SetIndices(_bottomSlicedMesh.SubIndices[i].ToArray(), MeshTopology.Triangles, i);
-            }
+            // Mesh rightHalfMesh = new Mesh();
+            // rightHalfMesh.name = "Right Splitted";
+            // rightHalfMesh.vertices = _bottomSlicedMesh.Vertices.ToArray();
+            // rightHalfMesh.triangles = _bottomSlicedMesh.Triangles.ToArray();
+            // rightHalfMesh.normals = _bottomSlicedMesh.Normals.ToArray();
+            // rightHalfMesh.uv = _bottomSlicedMesh.UVs.ToArray();
+            // rightHalfMesh.subMeshCount = _bottomSlicedMesh.SubIndices.Count;
+            // for (int i = 0; i < _bottomSlicedMesh.SubIndices.Count; i++)
+            // {
+            //     rightHalfMesh.SetIndices(_bottomSlicedMesh.SubIndices[i].ToArray(), MeshTopology.Triangles, i);
+            // }
+            var rightHalfMesh = _bottomSlicedMesh.ToMesh();
 
             // 元のオブジェクトを左側に
-            sourceObject.name = "Left Side";
+            sourceObject.name = "LeftSide";
             sourceObject.GetComponent<MeshFilter>().mesh = leftHalfMesh;
+            GameObject leftObj = sourceObject;
+            leftObj.GetComponent<MeshRenderer>().materials = materials;
 
             // 右側は生成
-            GameObject leftObj = sourceObject;
-
-            GameObject rightObj = new GameObject("Right Side", typeof(MeshFilter), typeof(MeshRenderer));
+            GameObject rightObj =
+                new GameObject("RightSide",
+                    typeof(MeshFilter),
+                    typeof(MeshRenderer));
             rightObj.transform.position = sourceObject.transform.position;
             rightObj.transform.rotation = sourceObject.transform.rotation;
             rightObj.GetComponent<MeshFilter>().mesh = rightHalfMesh;
-
-            leftObj.GetComponent<MeshRenderer>().materials = materials;
             rightObj.GetComponent<MeshRenderer>().materials = materials;
 
             if (makeGap)
@@ -258,7 +259,7 @@ namespace SmasherDestruction.Editor
             Vector3 newNormal1 = Vector3.Lerp(leftNormals[0], rightNormals[0], normalizedDistance);
 
             // 新しく指定した頂点群に頂点を追加
-            _newVertices.Add(newVertex1);
+            _newVerticesPos.Add(newVertex1);
 
             // 右側
             _blade.Raycast(new Ray(leftPoints[1], (rightPoints[1] - leftPoints[1]).normalized), out distance);
@@ -269,7 +270,7 @@ namespace SmasherDestruction.Editor
             Vector2 newUv2 = Vector2.Lerp(leftUVs[1], rightUVs[1], normalizedDistance);
             Vector3 newNormal2 = Vector3.Lerp(leftNormals[1], rightNormals[1], normalizedDistance);
 
-            _newVertices.Add(newVertex2);
+            _newVerticesPos.Add(newVertex2);
 
             // トライアングル
             // 左側
@@ -318,44 +319,44 @@ namespace SmasherDestruction.Editor
         {
             _capVertChecked.Clear();
 
-            for (int i = 0; i < _newVertices.Count; i++)
+            for (int i = 0; i < _newVerticesPos.Count; i++)
             {
                 // 調査済みはとばす
-                if (_capVertChecked.Contains(_newVertices[i]))
+                if (_capVertChecked.Contains(_newVerticesPos[i]))
                 {
                     continue;
                 }
 
                 _capVertPolygon.Clear();
 
-                _capVertPolygon.Add(_newVertices[i]);
-                _capVertPolygon.Add(_newVertices[i + 1]);
+                _capVertPolygon.Add(_newVerticesPos[i]);
+                _capVertPolygon.Add(_newVerticesPos[i + 1]);
 
-                _capVertChecked.Add(_newVertices[i]);
-                _capVertChecked.Add(_newVertices[i + 1]);
+                _capVertChecked.Add(_newVerticesPos[i]);
+                _capVertChecked.Add(_newVerticesPos[i + 1]);
 
                 bool isDone = false;
                 while (!isDone)
                 {
                     isDone = true;
 
-                    for (int k = 0; k < _newVertices.Count; k += 2)
+                    for (int k = 0; k < _newVerticesPos.Count; k += 2)
                     {
                         // 【新頂点のペアを探す】
-                        if (_newVertices[k] == _capVertPolygon[_capVertPolygon.Count - 1] &&
-                            !_capVertChecked.Contains(_newVertices[k + 1]))
+                        if (_newVerticesPos[k] == _capVertPolygon[_capVertPolygon.Count - 1] &&
+                            !_capVertChecked.Contains(_newVerticesPos[k + 1]))
                         {
                             // ペアの頂点を見つけたらポリゴン配列へ追加、次のループを回す。
                             isDone = false;
-                            _capVertPolygon.Add(_newVertices[k + 1]);
-                            _capVertChecked.Add(_newVertices[k + 1]);
+                            _capVertPolygon.Add(_newVerticesPos[k + 1]);
+                            _capVertChecked.Add(_newVerticesPos[k + 1]);
                         }
-                        else if (_newVertices[k + 1] == _capVertPolygon[_capVertPolygon.Count - 1] &&
-                                 !_capVertChecked.Contains(_newVertices[k]))
+                        else if (_newVerticesPos[k + 1] == _capVertPolygon[_capVertPolygon.Count - 1] &&
+                                 !_capVertChecked.Contains(_newVerticesPos[k]))
                         {
                             isDone = false;
-                            _capVertPolygon.Add(_newVertices[k]);
-                            _capVertChecked.Add(_newVertices[k]);
+                            _capVertPolygon.Add(_newVerticesPos[k]);
+                            _capVertChecked.Add(_newVerticesPos[k]);
                         }
                     }
                 }
