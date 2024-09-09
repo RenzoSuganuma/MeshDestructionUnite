@@ -8,6 +8,9 @@ using Random = UnityEngine.Random;
 using UnityEditor;
 #endif
 
+/// <summary>
+/// 断片化処理のコア機能を実装しているクラス
+/// </summary>
 public static class Fragmenter
 {
     /// <summary>

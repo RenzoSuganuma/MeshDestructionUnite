@@ -2,6 +2,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
+/// <summary>
+/// 被破壊オブジェクトにアタッチされるコンポーネント。
+/// 動的にフラクチャ処理を実行する。
+/// </summary>
 [RequireComponent(typeof(MeshFilter))]
 [RequireComponent(typeof(MeshRenderer))]
 [RequireComponent(typeof(Rigidbody))]
@@ -14,34 +18,36 @@ public class Fracture : MonoBehaviour
 
     /// <summary>
     /// The number of times this fragment has been re-fractured.
+    /// 残りの再断片化 回数
     /// </summary>
     [HideInInspector]
     public int currentRefractureCount = 0;
 
     /// <summary>
     /// Collector object that stores the produced fragments
+    /// 断片のオブジェクトのルートオブジェクト
     /// </summary>
     private GameObject fragmentRoot;
-
-    [ContextMenu("Print Mesh Info")]
-    public void PrintMeshInfo()
-    {
-        var mesh = this.GetComponent<MeshFilter>().mesh;
-        Debug.Log("Positions");
-
-        var positions = mesh.vertices;
-        var normals = mesh.normals;
-        var uvs = mesh.uv;
-
-        for (int i = 0; i < positions.Length; i++)
-        {
-            Debug.Log($"Vertex {i}");
-            Debug.Log($"POS | X: {positions[i].x} Y: {positions[i].y} Z: {positions[i].z}");
-            Debug.Log($"NRM | X: {normals[i].x} Y: {normals[i].y} Z: {normals[i].z} LEN: {normals[i].magnitude}");
-            Debug.Log($"UV  | U: {uvs[i].x} V: {uvs[i].y}");
-            Debug.Log("");
-        }
-    }
+    //
+    // [ContextMenu("Print Mesh Info")]
+    // public void PrintMeshInfo()
+    // {
+    //     var mesh = this.GetComponent<MeshFilter>().mesh;
+    //     Debug.Log("Positions");
+    //
+    //     var positions = mesh.vertices;
+    //     var normals = mesh.normals;
+    //     var uvs = mesh.uv;
+    //
+    //     for (int i = 0; i < positions.Length; i++)
+    //     {
+    //         Debug.Log($"Vertex {i}");
+    //         Debug.Log($"POS | X: {positions[i].x} Y: {positions[i].y} Z: {positions[i].z}");
+    //         Debug.Log($"NRM | X: {normals[i].x} Y: {normals[i].y} Z: {normals[i].z} LEN: {normals[i].magnitude}");
+    //         Debug.Log($"UV  | U: {uvs[i].x} V: {uvs[i].y}");
+    //         Debug.Log("");
+    //     }
+    // }
 
     public void CauseFracture()
     {
@@ -71,6 +77,8 @@ public class Fracture : MonoBehaviour
             if (collision.contactCount > 0)
             {
                 // Collision force must exceed the minimum force (F = I / T)
+                // 衝突の際に加わる力 F = I / T
+                // F : Force , I : Impulse , T : Time 左から 力、力積、時間
                 var contact = collision.contacts[0];
                 float collisionForce = collision.impulse.magnitude / Time.fixedDeltaTime;
 
@@ -79,10 +87,14 @@ public class Fracture : MonoBehaviour
 
                 // Object is unfrozen if the colliding object has the correct tag (if tag filtering is enabled)
                 // and the collision force exceeds the minimum collision force.
+                // オブジェクトに加わった衝突力が指定した衝突力より大きかったら
+                // 断片化を実行する
                 if (collisionForce > triggerOptions.minimumCollisionForce &&
                    (triggerOptions.filterCollisionsByTag && tagAllowed))
                 {
+                    // コールバックを実行して
                     callbackOptions.CallOnFracture(contact.otherCollider, gameObject, contact.point);
+                    // 断片化を実行する
                     this.ComputeFracture();
                 }
             }
@@ -127,6 +139,7 @@ public class Fracture : MonoBehaviour
         if (mesh != null)
         {
             // If the fragment root object has not yet been created, create it now
+            // 断片のルートのオブジェクトがないなら生成する。
             if (this.fragmentRoot == null)
             {
                 // Create a game object to contain the fragments
@@ -141,7 +154,7 @@ public class Fracture : MonoBehaviour
 
             var fragmentTemplate = CreateFragmentTemplate();
 
-            if (fractureOptions.asynchronous)
+            if (fractureOptions.asynchronous) // 非同期処理で実行するなら
             {
                 StartCoroutine(Fragmenter.FractureAsync(
                     this.gameObject,

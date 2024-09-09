@@ -3,6 +3,7 @@ using UnityEngine.TestTools;
 
 /// <summary>
 /// Data structure containing position/normal/UV data for a single vertex
+/// ポジション、法線、UVをまとめて格納している構造体
 /// </summary>
 public struct MeshVertex
 {

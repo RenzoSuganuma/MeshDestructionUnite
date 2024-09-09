@@ -2,6 +2,9 @@ using System;
 using UnityEngine;
 using UnityEngine.Events;
 
+/// <summary>
+/// UnityEventを最終的に呼び出しているラッパークラス。
+/// </summary>
 [Serializable]
 public class CallbackOptions
 {
