@@ -9,13 +9,13 @@ namespace SmasherDestruction.Editor
     public static class TsujigiriUtility
     {
         /// <summary> 要素の重複を許さないでリストにリストを追加する </summary>
-        /// <param name="fragmentList"></param>
-        /// <param name="sourceList"></param>
-        private static void AddCuttedFragmentListToList(
+        /// <param name="fragmentList">破片が格納されているリスト</param>
+        /// <param name="newFragments">新たに生成された破片のリスト</param>
+        private static void AddFragmentToList(
             List<GameObject> fragmentList,
-            List<GameObject> sourceList)
+            List<GameObject> newFragments)
         {
-            foreach (var obj in sourceList)
+            foreach (var obj in newFragments)
             {
                 if (!fragmentList.Contains(obj))
                 {
@@ -44,17 +44,17 @@ namespace SmasherDestruction.Editor
             {
                 foreach (var mesh in cuttedMeshes)
                 {
-                    var result = Tsujigiri.CutMesh(mesh, anchorPos, planeNormal, insideMaterial, makeGap);
-                    AddCuttedFragmentListToList(results, result.ToList());
+                    var frag = Tsujigiri.CutMesh(mesh, anchorPos, planeNormal, insideMaterial, makeGap);
+                    AddFragmentToList(results, frag.ToList());
                 }
 
-                AddCuttedFragmentListToList(cuttedMeshes, results);
+                AddFragmentToList(cuttedMeshes, results);
             }
             else // まだ切られてない場合
             {
                 cuttedMeshes.Clear();
-                var result = Tsujigiri.CutMesh(victim, anchorPos, planeNormal, insideMaterial, makeGap);
-                AddCuttedFragmentListToList(cuttedMeshes, result.ToList());
+                var frag = Tsujigiri.CutMesh(victim, anchorPos, planeNormal, insideMaterial, makeGap);
+                AddFragmentToList(cuttedMeshes, frag.ToList());
             }
         }
     }
