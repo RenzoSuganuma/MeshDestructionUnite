@@ -23,29 +23,25 @@ namespace SmasherDestruction.Kamaitachi.Dev
                 var list = _v3d.Sites[i];
                 foreach (var vertexIndex in list)
                 {
+                    var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    cube.transform.localPosition = vertices[vertexIndex];
+                    cube.transform.localScale = Vector3.one * .05f;
+                    cube.GetComponent<MeshRenderer>().material.color = _v3d.Colors[i];
+                    cube.name = $"site:{i},ver:{vertexIndex}";
                     foreach (var v3dBorderIndices in _v3d.BorderVertices)
                     {
                         if (!v3dBorderIndices.Contains(vertexIndex))
                         {
-                            var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                            cube.transform.localPosition = vertices[vertexIndex];
-                            cube.transform.localScale = Vector3.one * .05f;
-                            cube.GetComponent<MeshRenderer>().material.color = _v3d.Colors[i];
+                        }
+                        else
+                        {
+                            // var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                            // cube.transform.localPosition = vertices[vertexIndex];
+                            // cube.transform.localScale = Vector3.one * .05f;
+                            // cube.GetComponent<MeshRenderer>().material.color = Color.black;
+                            // cube.name = $"BORDER_VERTEX=site:{i},ver:{vertexIndex}";
                         }
                     }
-                }
-            }
-
-            for (int i = 0; i < _v3d.BorderVertices.Length; i++)
-            {
-                var list = _v3d.BorderVertices[i];
-                foreach (var item in list)
-                {
-                    Debug.Log($"border = {item}");
-                    var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                    cube.transform.localPosition = vertices[item];
-                    cube.transform.localScale = Vector3.one * .05f;
-                    cube.GetComponent<MeshRenderer>().material.color = Color.black;
                 }
             }
         }

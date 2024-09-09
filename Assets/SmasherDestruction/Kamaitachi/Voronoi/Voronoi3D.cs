@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem.Layouts;
 using Random = UnityEngine.Random;
@@ -57,55 +58,36 @@ namespace SmasherDestruction.Kamaitachi.Voronoi
             CreateSites(mesh);
             EraseDuplicatedVertices();
 
+            // 境い目の頂点を格納しておく配列の初期化はここでやる。領域の配列の初期化の後に必ず実行。:_sitesのプロパティを参照しているから
             _borderVertices = new List<int>[_sites.Length];
             for (int i = 0; i < _sites.Length; i++)
             {
                 _borderVertices[i] = new List<int>();
             }
 
-            // 境界線にある頂点を検索し、有ればその頂点のインデックスをまとめている配列へ追加
-            var vertices = mesh.vertices;
-            var triangles = mesh.triangles;
-
-            for (int i = 0; i < triangles.Length; i += 3)
+            // 同じ母点に属している頂点が構成する三角形以外の三角形が境目の三角形
+            for (int i = 0; i < mesh.triangles.Length; i += 3)
             {
-                // インデックスが範囲外を指定してしまうため、循環するように余りを使う。
-                var p1 = FindSite(_sites, i);
-                var p2 = FindSite(_sites, i + 1 % vertices.Length);
-                var p3 = FindSite(_sites, i + 2 % vertices.Length);
-                Debug.Log($"クランプ前 p1 = {p1},p2 = {p2}, p3 = {p3}");
+                var p1 = FindSite(_sites, mesh.triangles[i]);
+                var p2 = FindSite(_sites, mesh.triangles[i + 1]);
+                var p3 = FindSite(_sites, mesh.triangles[i + 2]);
 
-                if (p1 is not -1)
-                    _borderVertices[p1].Add(i);
-                if (p2 is not -1)
-                    _borderVertices[p2].Add(i + 1 % vertices.Length);
-                if (p3 is not -1)
-                    _borderVertices[p3].Add(i + 2 % vertices.Length);
-                if ((p1 is not -1) && (p1 < _sites.Length - 1) && (p1 != p2 || p1 != p3)) // p1
-                {
-                    if ((p2 is not -1) && (p2 < _sites.Length - 1) && (p2 != p1 || p2 != p3)) // p2
-                    {
-                        if ((p3 is not -1) && (p3 < _sites.Length - 1) && (p3 != p1 || p3 != p2)) // p3
-                        {
-                        }
-                    }
-                }
+                Debug.Log($"vert:{mesh.triangles[i]}, p1:{p1}, p2:{p2}, p3:{p3}");
             }
         }
 
         /// <summary>
-        /// 領域のインデックスを返す
+        /// 領域のインデックスを返す。見つからなかったら -1を返す。
         /// </summary>
         private int FindSite(List<int>[] sites, int vertexIndex)
         {
             int ret = -1;
 
-            for (int i = 0; i < sites.Length; i++)
+            for (int i = sites.Length - 1; i >= 0; i--)
             {
                 if (sites[i].Contains(vertexIndex))
                 {
                     ret = i;
-                    break;
                 }
             }
 
