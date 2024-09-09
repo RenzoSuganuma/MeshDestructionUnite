@@ -157,16 +157,7 @@ namespace SmasherDestruction.Editor
         {
             MeshVertex[] leftVertices = new MeshVertex[2];
             MeshVertex[] rightVertices = new MeshVertex[2];
-
-            // ↑ に置き換える
-            // Vector3[] leftPoints = new Vector3[2];
-            // Vector3[] leftNormals = new Vector3[2];
-            // Vector2[] leftUVs = new Vector2[2];
-            //
-            // Vector3[] rightPoints = new Vector3[2];
-            // Vector3[] rightNormals = new Vector3[2];
-            // Vector2[] rightUVs = new Vector2[2];
-
+            
             bool settedLeft = false;
             bool settedRight = false;
 
@@ -183,9 +174,6 @@ namespace SmasherDestruction.Editor
 
                         // １，２番目の頂点共にひとまず同値で初期化
                         // 1番目のデータは正しかったとしてもここで２番目のデータが正しいと確約していない
-                        // leftPoints[1] = leftPoints[0] = _victimMesh.vertices[p[side]];
-                        // leftUVs[1] = leftUVs[0] = _victimMesh.uv[p[side]];
-                        // leftNormals[1] = leftNormals[0] = _victimMesh.normals[p[side]];
                         leftVertices[1].Position = leftVertices[0].Position = _victimMesh.vertices[p[side]];
                         leftVertices[1].Normal = leftVertices[0].Normal = _victimMesh.normals[p[side]];
                         leftVertices[1].Uv = leftVertices[0].Uv = _victimMesh.uv[p[side]];
@@ -207,9 +195,6 @@ namespace SmasherDestruction.Editor
 
                         // １，２番目の頂点共にひとまず同値で初期化
                         // 1番目のデータは正しかったとしてもここで２番目のデータが正しいと確約していない
-                        // rightPoints[1] = rightPoints[0] = _victimMesh.vertices[p[side]];
-                        // rightUVs[1] = rightUVs[0] = _victimMesh.uv[p[side]];
-                        // rightNormals[1] = rightNormals[0] = _victimMesh.normals[p[side]];
                         rightVertices[1].Position = rightVertices[0].Position = _victimMesh.vertices[p[side]];
                         rightVertices[1].Normal = rightVertices[0].Normal = _victimMesh.normals[p[side]];
                     }

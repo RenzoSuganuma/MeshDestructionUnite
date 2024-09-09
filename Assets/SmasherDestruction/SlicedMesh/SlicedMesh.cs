@@ -1,11 +1,8 @@
 using System.Collections.Generic;
-#if UNITY_EDITOR
 using UnityEngine;
-#endif
 
 namespace SmasherDestruction.Datas
 {
-
     /// <summary> 切断されたメッシュ情報を一時的に保存する時に活用する </summary>
     public sealed class SlicedMesh
     {
