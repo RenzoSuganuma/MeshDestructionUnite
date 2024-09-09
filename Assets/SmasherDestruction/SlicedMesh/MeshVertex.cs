@@ -2,6 +2,9 @@
 
 namespace SmasherDestruction.Datas
 {
+    /// <summary>
+    /// 頂点の位置、法線、UVをまとめた構造体
+    /// </summary>
     public struct MeshVertex
     {
         public Vector3 Position;
