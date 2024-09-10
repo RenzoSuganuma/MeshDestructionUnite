@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using GouwangDestruction.Core;
@@ -10,9 +10,9 @@ using UnityEngine.Serialization;
 namespace GouwangDestruction.Editor
 {
     /// <summary>
-    /// 編集モード上で実行されるツールのインターフェイスの本体
+    /// 辻斬りのエディタ画面
     /// </summary>
-    public sealed class SmasherDestructionEditorWindow : EditorWindow
+    public class TsujigiriEditorWindow : EditorWindow
     {
         /// <summary> 切断対象のオブジェクト </summary>
         public GameObject VictimObject;
@@ -35,11 +35,6 @@ namespace GouwangDestruction.Editor
         private string _meshName;
         private bool _makeGap;
 
-        /// <summary>
-        /// ツールのモード 0 = 辻斬り 、 1 = 剛腕
-        /// </summary>
-        private FragmentationMode _fragmentationMode;
-
         private void OnEnable()
         {
             _serializedObject = new SerializedObject(this);
@@ -59,47 +54,13 @@ namespace GouwangDestruction.Editor
             EditorGUILayout.TextArea("SmasherDestruction",
                 SmasherDestructionConstantValues.GetGUIStyle_LabelTitle());
 
-            if (_serializedObject is not null)
-            {
-                GUILayout.Space(10);
-                EditorGUILayout.PropertyField(_serializedObject.FindProperty($"{nameof(VictimObject)}"));
-                GUILayout.Space(10);
-                EditorGUILayout.PropertyField(_serializedObject.FindProperty($"{nameof(PlaneObject)}"));
-                GUILayout.Space(10);
-                EditorGUILayout.PropertyField(_serializedObject.FindProperty($"{nameof(InsideMaterial)}"));
-                GUILayout.Space(10);
-            }
-
             // 破壊対象あるなら描写する
-            if (_serializedObject.FindProperty($"{nameof(VictimObject)}").objectReferenceValue is not null)
-            {
-                Draw();
-            }
-            else
-            {
-                EditorGUILayout.TextArea("Attach The Destruction Target",
-                    SmasherDestructionConstantValues.GetGUIStyle_LabelNotice());
-            }
+            Draw();
 
             // ウィンドウを閉じる ボタン
             if (GUILayout.Button("Close Window"))
             {
-                VictimObject = null;
-                PlaneObject = null;
-                InsideMaterial = null;
-                _fragmentsObject = null;
-                _fragmentsParent = null;
-                _planeAnchorPos = Vector3.zero;
-                _planeRot = Vector3.zero;
-                _meshName = "";
-                _makeGap = false;
-
-                _planeRot = _planeAnchorPos = Vector3.zero;
-                if (PlaneObject is not null)
-                {
-                    PlaneObject.transform.position = _planeAnchorPos;
-                    PlaneObject.transform.rotation = Quaternion.Euler(_planeRot);
-                }
+                ResetFeilds();
 
                 _serializedObject.Dispose();
                 _serializedObject = null;
@@ -113,21 +74,51 @@ namespace GouwangDestruction.Editor
             }
         }
 
+        private void ResetFeilds()
+        {
+            if (PlaneObject is not null)
+            {
+                PlaneObject.transform.position = Vector3.zero;
+                PlaneObject.transform.rotation = Quaternion.Euler(0, 0, 0);
+            }
+
+            VictimObject = null;
+            PlaneObject = null;
+            InsideMaterial = null;
+            _fragmentsObject = null;
+            _fragmentsParent = null;
+            _planeAnchorPos = Vector3.zero;
+            _planeRot = Vector3.zero;
+            _meshName = "";
+            _makeGap = false;
+        }
+
         private void Draw()
         {
             // フラグモード ラベル
-            GUILayout.Label("Fragmentation Mode",
+            GUILayout.Label("Tujigiri",
                 SmasherDestructionConstantValues.GetGUIStyle_LabelSmall());
             GUILayout.Space(10);
-
-            // 編集モード を 選ぶ
-            var fragModeInt = (int)_fragmentationMode;
-            fragModeInt = GUILayout.Toolbar(fragModeInt,
-                new GUIContent[2]
-                    { new GUIContent("Tsujigiri"), new GUIContent("Gouwang") });
-            _fragmentationMode = (FragmentationMode)fragModeInt;
-
             GUILayout.Space(10);
+
+            if (_serializedObject is not null)
+            {
+                GUILayout.Space(10);
+                EditorGUILayout.PropertyField(_serializedObject.FindProperty($"{nameof(VictimObject)}"));
+                GUILayout.Space(10);
+                EditorGUILayout.PropertyField(_serializedObject.FindProperty($"{nameof(PlaneObject)}"));
+                GUILayout.Space(10);
+                EditorGUILayout.PropertyField(_serializedObject.FindProperty($"{nameof(InsideMaterial)}"));
+                GUILayout.Space(10);
+            }
+
+            if (_serializedObject.FindProperty($"{nameof(VictimObject)}").objectReferenceValue is null)
+            {
+                EditorGUILayout.TextArea("Attach The Destruction Target",
+                    SmasherDestructionConstantValues.GetGUIStyle_LabelNotice());
+                return;
+            }
+
             // 隙間を つくるか
             _makeGap = EditorGUILayout.Toggle("Make Gap", _makeGap);
             GUILayout.Space(10);
@@ -141,50 +132,17 @@ namespace GouwangDestruction.Editor
             GUILayout.Space(10);
 
             // メッシュ編集 実行ボタン
-            if (GUILayout.Button(
-                    _fragmentationMode switch // モードが辻斬り か 剛腕 かで分岐
-                    {
-                        FragmentationMode.Tsujigiri => "Cut Mesh",
-                        FragmentationMode.Gouwang => "Frag Mesh",
-                        _ => ""
-                    }))
+            if (GUILayout.Button("Cut Mesh"))
             {
-                switch (_fragmentationMode)
-                {
-                    case FragmentationMode.Tsujigiri: // モード ＝ 辻斬り
-                    {
-                        TsujigiriUtility.CutTheMesh(
-                            VictimObject,
-                            _fragmentsObject,
-                            _planeAnchorPos,
-                            PlaneObject.up,
-                            InsideMaterial,
-                            _makeGap);
-                        break;
-                    }
-                    case FragmentationMode.Gouwang: // モード ＝ 剛腕
-                    {
-                        GouwangUtility.DoFragmentation(
-                            VictimObject,
-                            _fragmentsObject,
-                            PlaneObject,
-                            InsideMaterial,
-                            _makeGap);
-
-                        // 断片のオブジェクトを１つにまとめる
-                        var parentObj = new GameObject();
-                        parentObj.name = _meshName;
-                        _fragmentsParent = parentObj;
-                        foreach (var fragment in _fragmentsObject)
-                        {
-                            fragment.transform.SetParent(parentObj.transform);
-                        }
-
-                        break;
-                    }
-                }
+                TsujigiriUtility.CutTheMesh(
+                    VictimObject,
+                    _fragmentsObject,
+                    _planeAnchorPos,
+                    PlaneObject.up,
+                    InsideMaterial,
+                    _makeGap);
             }
-            
+
             GUILayout.Space(10);
 
             // メッシュ 保存ボタン
@@ -193,6 +151,7 @@ namespace GouwangDestruction.Editor
                 CheckDirectory();
                 SaveCuttedMeshes();
             }
+
             GUILayout.Space(10);
 
             // 切断面 の 回転 指定
@@ -202,6 +161,7 @@ namespace GouwangDestruction.Editor
             {
                 _planeRot = Vector3.zero;
             }
+
             GUILayout.Space(10);
 
             // 切断面 の 位置 指定
@@ -211,6 +171,7 @@ namespace GouwangDestruction.Editor
             {
                 _planeAnchorPos = Vector3.zero;
             }
+
             GUILayout.Space(10);
 
             // リセットボタン
@@ -218,15 +179,7 @@ namespace GouwangDestruction.Editor
                     "Reset All",
                     SmasherDestructionConstantValues.GetGUIStyle_Button()))
             {
-                VictimObject = null;
-                PlaneObject = null;
-                InsideMaterial = null;
-                _fragmentsObject = null;
-                _fragmentsParent = null;
-                _planeAnchorPos = Vector3.zero;
-                _planeRot = Vector3.zero;
-                _meshName = "";
-                _makeGap = false;
+                ResetFeilds();
             }
 
             try
@@ -281,28 +234,15 @@ namespace GouwangDestruction.Editor
             }
 
             // プレハブとして保存
-            switch (_fragmentationMode)
+            if (_fragmentsParent is null)
             {
-                case FragmentationMode.Tsujigiri:
+                var p = new GameObject();
+                p.name = _meshName;
+                _fragmentsParent = p;
+
+                foreach (var frag in _fragmentsObject)
                 {
-                    if (_fragmentsParent is null)
-                    {
-                        var p = new GameObject();
-                        p.name = _meshName;
-                        _fragmentsParent = p;
-
-                        foreach (var frag in _fragmentsObject)
-                        {
-                            frag.transform.SetParent(_fragmentsParent.transform);
-                        }
-                    }
-
-                    break;
-                }
-
-                case FragmentationMode.Gouwang:
-                {
-                    break;
+                    frag.transform.SetParent(_fragmentsParent.transform);
                 }
             }
 
