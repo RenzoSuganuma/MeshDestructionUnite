@@ -148,21 +148,24 @@ namespace SmasherDestruction.Editor
         /// <summary>
         /// メッシュ切断の本体
         /// </summary>
-        /// <param name="subMesh"></param>
+        /// <param name="subMeshIndex"></param>
         /// <param name="sides"></param>
-        /// <param name="index0"></param>
         /// <param name="index1"></param>
         /// <param name="index2"></param>
-        private static void CutThisFace(int subMesh, bool[] sides, int index0, int index1, int index2)
+        /// <param name="index3"></param>
+        private static void CutThisFace(int subMeshIndex, bool[] sides, int index1, int index2, int index3)
         {
+            // 平面の上を左、下を右 とする
+            // position , normal , uv をまとめたいため、
+            // それらをまとめている構造体の配列を実装。
             MeshVertex[] leftVertices = new MeshVertex[2];
             MeshVertex[] rightVertices = new MeshVertex[2];
-            
+
             bool settedLeft = false;
             bool settedRight = false;
 
             // トライアングルの頂点を配列として保持
-            int[] p = new[] { index0, index1, index2 };
+            int[] indices = new[] { index1, index2, index3 };
 
             for (int side = 0; side < 3; side++)
             {
@@ -174,16 +177,16 @@ namespace SmasherDestruction.Editor
 
                         // １，２番目の頂点共にひとまず同値で初期化
                         // 1番目のデータは正しかったとしてもここで２番目のデータが正しいと確約していない
-                        leftVertices[1].Position = leftVertices[0].Position = _victimMesh.vertices[p[side]];
-                        leftVertices[1].Normal = leftVertices[0].Normal = _victimMesh.normals[p[side]];
-                        leftVertices[1].Uv = leftVertices[0].Uv = _victimMesh.uv[p[side]];
+                        leftVertices[1].Position = leftVertices[0].Position = _victimMesh.vertices[indices[side]];
+                        leftVertices[1].Normal = leftVertices[0].Normal = _victimMesh.normals[indices[side]];
+                        leftVertices[1].Uv = leftVertices[0].Uv = _victimMesh.uv[indices[side]];
                     }
                     else
                     {
                         // ２番目の頂点のデータをここで正しいとしているデータで初期化
-                        leftVertices[1].Position = _victimMesh.vertices[p[side]];
-                        leftVertices[1].Normal = _victimMesh.normals[p[side]];
-                        leftVertices[1].Uv = _victimMesh.uv[p[side]];
+                        leftVertices[1].Position = _victimMesh.vertices[indices[side]];
+                        leftVertices[1].Normal = _victimMesh.normals[indices[side]];
+                        leftVertices[1].Uv = _victimMesh.uv[indices[side]];
                     }
                 }
                 // 右側にある場合
@@ -195,15 +198,15 @@ namespace SmasherDestruction.Editor
 
                         // １，２番目の頂点共にひとまず同値で初期化
                         // 1番目のデータは正しかったとしてもここで２番目のデータが正しいと確約していない
-                        rightVertices[1].Position = rightVertices[0].Position = _victimMesh.vertices[p[side]];
-                        rightVertices[1].Normal = rightVertices[0].Normal = _victimMesh.normals[p[side]];
+                        rightVertices[1].Position = rightVertices[0].Position = _victimMesh.vertices[indices[side]];
+                        rightVertices[1].Normal = rightVertices[0].Normal = _victimMesh.normals[indices[side]];
                     }
                     else
                     {
                         // ２番目の頂点のデータをここで正しいとしているデータで初期化
-                        rightVertices[1].Position = _victimMesh.vertices[p[side]];
-                        rightVertices[1].Normal = _victimMesh.normals[p[side]];
-                        rightVertices[1].Uv = _victimMesh.uv[p[side]];
+                        rightVertices[1].Position = _victimMesh.vertices[indices[side]];
+                        rightVertices[1].Normal = _victimMesh.normals[indices[side]];
+                        rightVertices[1].Uv = _victimMesh.uv[indices[side]];
                     }
                 }
             }
@@ -212,6 +215,8 @@ namespace SmasherDestruction.Editor
             float normalizedDistance = 0f;
             // 距離。頂点と平面の距離
             float distance = 0f;
+
+            #region 左側の断片用に新しく頂点を求めて追加する
 
             // 左側
             // 【すでに指定した平面と交差する点を探索する】
@@ -230,9 +235,13 @@ namespace SmasherDestruction.Editor
             Vector3 newVertex1 = Vector3.Lerp(leftVertices[0].Position, rightVertices[0].Position, normalizedDistance);
             Vector3 newNormal1 = Vector3.Lerp(leftVertices[0].Normal, rightVertices[0].Normal, normalizedDistance);
             Vector2 newUv1 = Vector2.Lerp(leftVertices[0].Uv, rightVertices[0].Uv, normalizedDistance);
-
             // 新しく指定した頂点群に頂点を追加
             _newVerticesPos.Add(newVertex1);
+
+            #endregion
+
+            #region 右側の断片用に新しく頂点を求めて追加する
+
             // 右側
             _blade.Raycast(
                 new Ray(leftVertices[1].Position
@@ -251,7 +260,12 @@ namespace SmasherDestruction.Editor
             // 新しく指定した頂点群に頂点を追加
             _newVerticesPos.Add(newVertex2);
 
-            // トライアングル
+            #endregion
+
+            // トライアングルを追加。
+
+            #region 左側三角形
+
             // 左側
             // 【縮退三角形的に追加】
             _topSlicedMesh.AddTriangle(
@@ -259,57 +273,64 @@ namespace SmasherDestruction.Editor
                 new Vector3[] { leftVertices[0].Normal, newNormal1, newNormal2 },
                 new Vector2[] { leftVertices[0].Uv, newUv1, newUv2 },
                 newNormal1,
-                subMesh
+                subMeshIndex
             );
             _topSlicedMesh.AddTriangle(
                 new Vector3[] { leftVertices[0].Position, leftVertices[1].Position, newVertex2 },
                 new Vector3[] { leftVertices[0].Normal, leftVertices[1].Normal, newNormal2 },
                 new Vector2[] { leftVertices[0].Uv, leftVertices[1].Uv, newUv2 },
                 newNormal2,
-                subMesh
+                subMeshIndex
             );
+
+            #endregion
+
+            #region 右側三角形
+
             // 右側
             _bottomSlicedMesh.AddTriangle(
                 new Vector3[] { rightVertices[0].Position, newVertex1, newVertex2 },
                 new Vector3[] { rightVertices[0].Normal, newNormal1, newNormal2 },
                 new Vector2[] { rightVertices[0].Uv, newUv1, newUv2 },
                 newNormal1,
-                subMesh
+                subMeshIndex
             );
             _bottomSlicedMesh.AddTriangle(
                 new Vector3[] { rightVertices[0].Position, rightVertices[1].Position, newVertex2 },
                 new Vector3[] { rightVertices[0].Normal, rightVertices[1].Normal, newNormal2 },
                 new Vector2[] { rightVertices[0].Uv, rightVertices[1].Uv, newUv2 },
                 newNormal2,
-                subMesh
+                subMeshIndex
             );
+
+            #endregion
         }
 
-        private static List<Vector3> _capVertChecked = new List<Vector3>();
-        private static List<Vector3> _capVertPolygon = new List<Vector3>();
+        private static List<Vector3> _capVerticesChecked = new List<Vector3>();
+        private static List<Vector3> _capVerticesPolygon = new List<Vector3>();
 
         /// <summary>
         /// 切断処理で新たに生成された頂点に基づいてカット面の生成をする
         /// </summary>
         private static void FillFace()
         {
-            _capVertChecked.Clear();
+            _capVerticesChecked.Clear();
 
             for (int i = 0; i < _newVerticesPos.Count; i++)
             {
                 // 調査済みはとばす
-                if (_capVertChecked.Contains(_newVerticesPos[i]))
+                if (_capVerticesChecked.Contains(_newVerticesPos[i]))
                 {
                     continue;
                 }
 
-                _capVertPolygon.Clear();
+                _capVerticesPolygon.Clear();
 
-                _capVertPolygon.Add(_newVerticesPos[i]);
-                _capVertPolygon.Add(_newVerticesPos[i + 1]);
+                _capVerticesPolygon.Add(_newVerticesPos[i]);
+                _capVerticesPolygon.Add(_newVerticesPos[i + 1]);
 
-                _capVertChecked.Add(_newVerticesPos[i]);
-                _capVertChecked.Add(_newVerticesPos[i + 1]);
+                _capVerticesChecked.Add(_newVerticesPos[i]);
+                _capVerticesChecked.Add(_newVerticesPos[i + 1]);
 
                 bool isDone = false;
                 while (!isDone)
@@ -319,26 +340,26 @@ namespace SmasherDestruction.Editor
                     for (int k = 0; k < _newVerticesPos.Count; k += 2)
                     {
                         // 【新頂点のペアを探す】
-                        if (_newVerticesPos[k] == _capVertPolygon[_capVertPolygon.Count - 1] &&
-                            !_capVertChecked.Contains(_newVerticesPos[k + 1]))
+                        if (_newVerticesPos[k] == _capVerticesPolygon[_capVerticesPolygon.Count - 1] &&
+                            !_capVerticesChecked.Contains(_newVerticesPos[k + 1]))
                         {
                             // ペアの頂点を見つけたらポリゴン配列へ追加、次のループを回す。
                             isDone = false;
-                            _capVertPolygon.Add(_newVerticesPos[k + 1]);
-                            _capVertChecked.Add(_newVerticesPos[k + 1]);
+                            _capVerticesPolygon.Add(_newVerticesPos[k + 1]);
+                            _capVerticesChecked.Add(_newVerticesPos[k + 1]);
                         }
-                        else if (_newVerticesPos[k + 1] == _capVertPolygon[_capVertPolygon.Count - 1] &&
-                                 !_capVertChecked.Contains(_newVerticesPos[k]))
+                        else if (_newVerticesPos[k + 1] == _capVerticesPolygon[_capVerticesPolygon.Count - 1] &&
+                                 !_capVerticesChecked.Contains(_newVerticesPos[k]))
                         {
                             isDone = false;
-                            _capVertPolygon.Add(_newVerticesPos[k]);
-                            _capVertChecked.Add(_newVerticesPos[k]);
+                            _capVerticesPolygon.Add(_newVerticesPos[k]);
+                            _capVerticesChecked.Add(_newVerticesPos[k]);
                         }
                     }
                 }
 
                 // ポリゴン形成
-                FillFaceFromVertices(_capVertPolygon);
+                FillFaceFromVertices(_capVerticesPolygon);
             }
         }
 
@@ -354,8 +375,9 @@ namespace SmasherDestruction.Editor
             {
                 center += vert;
             }
+
             center /= verts.Count;
-            
+
             Vector3 upward = Vector3.zero;
             // 90度回転。 平面の左側を上とする
             upward.x = _blade.normal.y;
