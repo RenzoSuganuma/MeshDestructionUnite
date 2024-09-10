@@ -34,7 +34,6 @@ namespace GouwangDestruction.Editor
         private Vector3 _planeRot;
         private string _meshName;
         private bool _makeGap;
-        private int _fragModeIndex;
 
         /// <summary>
         /// ツールのモード 0 = 辻斬り 、 1 = 剛腕
@@ -57,14 +56,18 @@ namespace GouwangDestruction.Editor
             _serializedObject.Update();
 
             // プロパティを表示して編集可能にする
-            EditorGUILayout.TextArea("<color=green>SmasherDestruction</color>",
+            EditorGUILayout.TextArea("SmasherDestruction",
                 SmasherDestructionConstantValues.GetGUIStyle_LabelTitle());
 
             if (_serializedObject is not null)
             {
+                GUILayout.Space(10);
                 EditorGUILayout.PropertyField(_serializedObject.FindProperty($"{nameof(VictimObject)}"));
+                GUILayout.Space(10);
                 EditorGUILayout.PropertyField(_serializedObject.FindProperty($"{nameof(PlaneObject)}"));
+                GUILayout.Space(10);
                 EditorGUILayout.PropertyField(_serializedObject.FindProperty($"{nameof(InsideMaterial)}"));
+                GUILayout.Space(10);
             }
 
             // 破壊対象あるなら描写する
@@ -75,12 +78,22 @@ namespace GouwangDestruction.Editor
             else
             {
                 EditorGUILayout.TextArea("Attach The Destruction Target",
-                    SmasherDestructionConstantValues.GetGUIStyle_LabelSmall());
+                    SmasherDestructionConstantValues.GetGUIStyle_LabelNotice());
             }
 
             // ウィンドウを閉じる ボタン
             if (GUILayout.Button("Close Window"))
             {
+                VictimObject = null;
+                PlaneObject = null;
+                InsideMaterial = null;
+                _fragmentsObject = null;
+                _fragmentsParent = null;
+                _planeAnchorPos = Vector3.zero;
+                _planeRot = Vector3.zero;
+                _meshName = "";
+                _makeGap = false;
+
                 _planeRot = _planeAnchorPos = Vector3.zero;
                 if (PlaneObject is not null)
                 {
@@ -105,6 +118,7 @@ namespace GouwangDestruction.Editor
             // フラグモード ラベル
             GUILayout.Label("Fragmentation Mode",
                 SmasherDestructionConstantValues.GetGUIStyle_LabelSmall());
+            GUILayout.Space(10);
 
             // 編集モード を 選ぶ
             var fragModeInt = (int)_fragmentationMode;
@@ -113,13 +127,18 @@ namespace GouwangDestruction.Editor
                     { new GUIContent("Tsujigiri"), new GUIContent("Gouwang") });
             _fragmentationMode = (FragmentationMode)fragModeInt;
 
+            GUILayout.Space(10);
             // 隙間を つくるか
             _makeGap = EditorGUILayout.Toggle("Make Gap", _makeGap);
+            GUILayout.Space(10);
 
             // ファイル名
             GUILayout.Label("Fragment File Name",
                 SmasherDestructionConstantValues.GetGUIStyle_LabelSmall());
+
+            GUILayout.Space(10);
             _meshName = GUILayout.TextArea(_meshName);
+            GUILayout.Space(10);
 
             // メッシュ編集 実行ボタン
             if (GUILayout.Button(
@@ -165,15 +184,15 @@ namespace GouwangDestruction.Editor
                     }
                 }
             }
+            
+            GUILayout.Space(10);
 
             // メッシュ 保存ボタン
-            if (GUILayout.Button("Save Mashes"))
+            if (GUILayout.Button("Save Meshes"))
             {
                 CheckDirectory();
-
                 SaveCuttedMeshes();
             }
-
             GUILayout.Space(10);
 
             // 切断面 の 回転 指定
@@ -183,6 +202,7 @@ namespace GouwangDestruction.Editor
             {
                 _planeRot = Vector3.zero;
             }
+            GUILayout.Space(10);
 
             // 切断面 の 位置 指定
             _planeAnchorPos = EditorGUILayout.Vector3Field("PlaneObject Anchor-Position", _planeAnchorPos);
@@ -190,6 +210,23 @@ namespace GouwangDestruction.Editor
             if (EditorGUILayout.LinkButton("Reset Value"))
             {
                 _planeAnchorPos = Vector3.zero;
+            }
+            GUILayout.Space(10);
+
+            // リセットボタン
+            if (GUILayout.Button(
+                    "Reset All",
+                    SmasherDestructionConstantValues.GetGUIStyle_Button()))
+            {
+                VictimObject = null;
+                PlaneObject = null;
+                InsideMaterial = null;
+                _fragmentsObject = null;
+                _fragmentsParent = null;
+                _planeAnchorPos = Vector3.zero;
+                _planeRot = Vector3.zero;
+                _meshName = "";
+                _makeGap = false;
             }
 
             try
@@ -213,6 +250,9 @@ namespace GouwangDestruction.Editor
             Gouwang.FindSaveTargetDirectory(Gouwang.CuttedMeshesPrefabFolderAbsolutePath);
         }
 
+        /// <summary>
+        /// モードに応じてセーブ処理をする
+        /// </summary>
         private void SaveCuttedMeshes() // 保存先のパスにメッシュのアセットとプレハブを保存する
         {
             if (_fragmentsObject.Count < 1) return;
@@ -256,6 +296,7 @@ namespace GouwangDestruction.Editor
                             frag.transform.SetParent(_fragmentsParent.transform);
                         }
                     }
+
                     break;
                 }
 
@@ -264,7 +305,7 @@ namespace GouwangDestruction.Editor
                     break;
                 }
             }
-            
+
             PrefabUtility.SaveAsPrefabAsset(_fragmentsParent,
                 Gouwang.CuttedMeshesPrefabFolderAbsolutePath + $"{_meshName}.prefab");
 
