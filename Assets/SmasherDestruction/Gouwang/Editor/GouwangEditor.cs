@@ -1,7 +1,9 @@
 using UnityEditor;
 using UnityEngine;
 
-/// <summary> 剛腕ランタイムのインスペクタを拡張する。ボタンの追加をする </summary>
+/// <summary>
+/// 剛腕ランタイムのインスペクタを拡張する。ボタンの追加をする
+/// </summary>
 [CustomEditor(typeof(Gouwang_RunTime))]
 public class GouwangEditor : Editor // 剛腕クラスを拡張する
 {

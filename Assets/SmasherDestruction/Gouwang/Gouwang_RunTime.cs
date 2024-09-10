@@ -8,15 +8,11 @@ using UnityEngine.Serialization;
 using Random = System.Random;
 using SmasherDestruction.Editor;
 
-/// <summary> これがアタッチされているオブジェクトをヒエラルキーに投げる。 </summary>
+/// <summary>
+/// これがアタッチされているオブジェクトをヒエラルキーに投げる。
+/// </summary>
 public class Gouwang_RunTime : MonoBehaviour
 {
-    public enum FragmentationMode
-    {
-        WithoutPhysics,
-        WithPhysics,
-    }
-
     [SerializeField] private FragmentationMode _fragmentationMode;
     [SerializeField] private float _rotateSpeed;
     [SerializeField] private Material _capMaterial;
@@ -102,7 +98,7 @@ public class Gouwang_RunTime : MonoBehaviour
 
         _planeObject.transform.up = new Vector3(r + r2, r1, 1);
         CutMesh();
-        
+
         _planeObject.transform.up = new Vector3(0, -1, 1);
         CutMesh();
         _planeObject.transform.up = new Vector3(_random.Next(-1, 1), -1, 1);
@@ -110,7 +106,7 @@ public class Gouwang_RunTime : MonoBehaviour
         _planeObject.transform.up = new Vector3(-.5f, 0, 1);
         CutMesh();
     }
-    
+
     private void Frag_1()
     {
         var r = _random.Next(0, 256);
