@@ -14,22 +14,25 @@ namespace GouwangDestruction.Editor
         [MenuItem("Window/SmasherDestruction/Gouwang")]
         public static void ShowGouwangWindow()
         {
-            InstantiateCutterPlane();
+            var obj = InstantiateCutterPlane();
             var window = GetWindow<GouwangEditorWindow>();
             window.titleContent = new GUIContent("GouwangWindow");
+            window.CutterPlane = obj;
         }
 
         [MenuItem("Window/SmasherDestruction/Tsujigiri")]
         public static void ShowTsujigiriWindow()
         {
-            InstantiateCutterPlane();
+            var obj = InstantiateCutterPlane();
             var window = GetWindow<TsujigiriEditorWindow>();
+            window.CutterPlane = obj;
             window.titleContent = new GUIContent("TsujigiriWindow");
         }
 
-        static void InstantiateCutterPlane()
+        static GameObject InstantiateCutterPlane()
         {
-            GameObject.Instantiate(PrefabUtility.LoadPrefabContents(Gouwang.CutterPlanePrefabFolderAbsolutePath));
+            return GameObject.Instantiate(
+                PrefabUtility.LoadPrefabContents(SmasherDestructionEditorUtility.CutterPlanePrefabFolderAbsolutePath));
         }
     }
 }
