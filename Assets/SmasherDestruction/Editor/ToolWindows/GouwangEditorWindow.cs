@@ -23,6 +23,8 @@ namespace GouwangDestruction.Editor
         /// <summary> 切断面のマテリアル </summary>
         public Material InsideMaterial;
 
+        public GameObject CutterPlane { get; set; }
+
         /// <summary>
         /// オブジェクトをウィンドウにアタッチできるように宣言
         /// </summary>
@@ -208,8 +210,9 @@ namespace GouwangDestruction.Editor
 
         private void CheckDirectory()
         {
-            Gouwang.FindSaveTargetDirectory(Gouwang.CuttedMeshesFolderAbsolutePath + $"{_meshName}/");
-            Gouwang.FindSaveTargetDirectory(Gouwang.CuttedMeshesPrefabFolderAbsolutePath);
+            Gouwang.FindSaveTargetDirectory(SmasherDestructionEditorUtility.CuttedMeshesFolderAbsolutePath +
+                                            $"{_meshName}/");
+            Gouwang.FindSaveTargetDirectory(SmasherDestructionEditorUtility.CuttedMeshesPrefabFolderAbsolutePath);
         }
 
         /// <summary>
@@ -219,16 +222,17 @@ namespace GouwangDestruction.Editor
         {
             if (_fragmentsObject.Count < 1) return;
 
-            Gouwang.FindSaveTargetDirectory(Gouwang.CuttedMeshesFolderAbsolutePath + $"{_meshName}/");
-            Gouwang.FindSaveTargetDirectory(Gouwang.CuttedMeshesPrefabFolderAbsolutePath);
+            Gouwang.FindSaveTargetDirectory(SmasherDestructionEditorUtility.CuttedMeshesFolderAbsolutePath +
+                                            $"{_meshName}/");
+            Gouwang.FindSaveTargetDirectory(SmasherDestructionEditorUtility.CuttedMeshesPrefabFolderAbsolutePath);
 
             // コンポーネントのアタッチ
             foreach (var cuttedMesh in _fragmentsObject)
             {
-                cuttedMesh.AddComponent<MeshCollider>();
+                var mc = cuttedMesh.AddComponent<MeshCollider>();
+                mc.convex = true;
                 cuttedMesh.GetComponent<MeshCollider>().sharedMesh = cuttedMesh.GetComponent<MeshFilter>().sharedMesh;
-                cuttedMesh.GetComponent<MeshCollider>().convex = true;
-                cuttedMesh.AddComponent<Rigidbody>();
+                var rb = cuttedMesh.AddComponent<Rigidbody>();
             }
 
             #region 保存処理
@@ -238,13 +242,11 @@ namespace GouwangDestruction.Editor
             {
                 var mesh = _fragmentsObject[i].GetComponent<MeshFilter>().sharedMesh;
 
-                AssetDatabase.CreateAsset(mesh,
-                    Gouwang.CuttedMeshesFolderAbsolutePath + $"{_meshName}/{_meshName}_Mesh_{i}.asset");
+                SmasherDestructionEditorUtility.CreateAndSaveToAsset(mesh, _meshName, i);
             }
 
             // プレハブとして保存
-            PrefabUtility.SaveAsPrefabAsset(_fragmentsParent,
-                Gouwang.CuttedMeshesPrefabFolderAbsolutePath + $"{_meshName}.prefab");
+            SmasherDestructionEditorUtility.SaveAsPrefab(_fragmentsParent, _meshName);
 
             #endregion
         }
