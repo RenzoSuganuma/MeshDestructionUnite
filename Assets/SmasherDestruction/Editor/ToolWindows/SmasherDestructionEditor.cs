@@ -1,4 +1,5 @@
 using System.IO;
+using SmasherDestruction.Editor;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -13,7 +14,7 @@ namespace GouwangDestruction.Editor
         [MenuItem("Window/SmasherDestruction/Gouwang")]
         public static void ShowGouwangWindow()
         {
-            GameObject.CreatePrimitive(PrimitiveType.Plane);
+            InstantiateCutterPlane();
             var window = GetWindow<GouwangEditorWindow>();
             window.titleContent = new GUIContent("GouwangWindow");
         }
@@ -21,9 +22,14 @@ namespace GouwangDestruction.Editor
         [MenuItem("Window/SmasherDestruction/Tsujigiri")]
         public static void ShowTsujigiriWindow()
         {
-            GameObject.CreatePrimitive(PrimitiveType.Plane);
+            InstantiateCutterPlane();
             var window = GetWindow<TsujigiriEditorWindow>();
             window.titleContent = new GUIContent("TsujigiriWindow");
+        }
+
+        static void InstantiateCutterPlane()
+        {
+            GameObject.Instantiate(PrefabUtility.LoadPrefabContents(Gouwang.CutterPlanePrefabFolderAbsolutePath));
         }
     }
 }

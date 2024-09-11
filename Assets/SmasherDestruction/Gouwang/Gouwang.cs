@@ -17,6 +17,9 @@ namespace SmasherDestruction.Editor
 
         public static string CuttedMeshesPrefabFolderAbsolutePath =
             "Assets/Resources/SmasherDestruction/Prefabs/";
+        
+        public static string CutterPlanePrefabFolderAbsolutePath =
+            "Assets/Resources/SmasherDestruction/Util/CutterPlane.prefab";
 
         /// <summary>
         /// 保存先ディレクトリを探す。

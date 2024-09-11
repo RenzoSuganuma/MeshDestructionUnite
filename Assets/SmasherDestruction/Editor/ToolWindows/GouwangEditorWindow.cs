@@ -225,10 +225,10 @@ namespace GouwangDestruction.Editor
             // コンポーネントのアタッチ
             foreach (var cuttedMesh in _fragmentsObject)
             {
-                cuttedMesh.AddComponent<MeshCollider>();
+                var mc = cuttedMesh.AddComponent<MeshCollider>();
+                mc.convex = true;
                 cuttedMesh.GetComponent<MeshCollider>().sharedMesh = cuttedMesh.GetComponent<MeshFilter>().sharedMesh;
-                cuttedMesh.GetComponent<MeshCollider>().convex = true;
-                cuttedMesh.AddComponent<Rigidbody>();
+                var rb = cuttedMesh.AddComponent<Rigidbody>();
             }
 
             #region 保存処理
