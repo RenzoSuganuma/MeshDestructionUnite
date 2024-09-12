@@ -10,13 +10,22 @@ namespace SmasherDestruction.Editor
     /// </summary>
     public static class Nawabari
     {
-        private static List<Vector3> _points = new();
-        private static List<Color> _colors = new();
+        private static List<Vector3> _points;
+        private static List<Color> _colors;
+        private static List<List<int>> _sites;
 
-        /// <summary>
-        /// キー：母点インデックス 値：領域内の頂点のインデックスの配列
-        /// </summary>
-        private static Dictionary<int, List<int>> _sites = new();
+        static Nawabari()
+        {
+            Init();
+        }
+        
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void Init()
+        {
+            _points = new();
+            _colors = new();
+            _sites = new();
+        }
 
         /// <summary>
         /// 断片化を実行
@@ -56,10 +65,7 @@ namespace SmasherDestruction.Editor
 
                 _points.Add(pnt);
                 _colors.Add(c);
-                if (!_sites.ContainsKey(i))
-                {
-                    _sites.Add(i, new List<int>());
-                }
+                _sites.Add(new List<int>());
             }
         }
 
