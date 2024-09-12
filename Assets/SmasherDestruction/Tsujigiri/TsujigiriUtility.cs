@@ -8,22 +8,6 @@ namespace SmasherDestruction.Editor
     /// <summary> ランタイム/エディタで辻斬りクラスを簡単に利用するためのヘルパークラス </summary>
     public static class TsujigiriUtility
     {
-        /// <summary> 要素の重複を許さないでリストにリストを追加する </summary>
-        /// <param name="fragmentList">破片が格納されているリスト</param>
-        /// <param name="newFragments">新たに生成された破片のリスト</param>
-        private static void AddFragmentToList(
-            List<GameObject> fragmentList,
-            List<GameObject> newFragments)
-        {
-            foreach (var obj in newFragments)
-            {
-                if (!fragmentList.Contains(obj))
-                {
-                    fragmentList.Add(obj);
-                }
-            }
-        }
-
         /// <summary> メッシュをカットする </summary>
         /// <param name="victim"></param>
         /// <param name="cuttedMeshes"></param>
@@ -55,6 +39,22 @@ namespace SmasherDestruction.Editor
                 cuttedMeshes.Clear();
                 var frag = Tsujigiri.CutMesh(victim, anchorPos, planeNormal, insideMaterial, makeGap);
                 AddFragmentToList(cuttedMeshes, frag.ToList());
+            }
+        }
+
+        /// <summary> 要素の重複を許さないでリストにリストを追加する </summary>
+        /// <param name="fragmentList">破片が格納されているリスト</param>
+        /// <param name="newFragments">新たに生成された破片のリスト</param>
+        private static void AddFragmentToList(
+            List<GameObject> fragmentList,
+            List<GameObject> newFragments)
+        {
+            foreach (var obj in newFragments)
+            {
+                if (!fragmentList.Contains(obj))
+                {
+                    fragmentList.Add(obj);
+                }
             }
         }
     }

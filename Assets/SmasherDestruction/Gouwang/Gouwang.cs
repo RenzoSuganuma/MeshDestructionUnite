@@ -1,73 +1,81 @@
-using System;
-using System.IO;
+using Random = UnityEngine.Random;
 using System.Collections.Generic;
-using System.Linq;
+using SmasherDestruction.Editor;
 using UnityEngine;
 
-namespace SmasherDestruction.Editor
+namespace GouwangDestruction.Core
 {
     /// <summary>
-    /// 被破壊メッシュを生成する機能を提供する
+    /// 編集モードで実行されるAPIを提供している剛腕クラス
     /// </summary>
-    /// Ver 1.0.0
     public static class Gouwang
     {
         /// <summary>
-        /// 保存先ディレクトリを探す。
+        /// メッシュの断片化処理を実行する
         /// </summary>
-        /// <param name="filePath"></param>
-        public static void FindSaveTargetDirectory(string filePath)
+        /// <param name="sourceObject"></param>
+        /// <param name="fragments"></param>
+        /// <param name="planeObject"></param>
+        /// <param name="capMaterial"></param>
+        /// <param name="makeGap"></param>
+        public static void ExecuteFragmentation(
+            GameObject sourceObject,
+            List<GameObject> fragments,
+            Transform planeObject,
+            Material capMaterial,
+            bool makeGap)
         {
-            if (!Directory.Exists(filePath))
-            {
-                Directory.CreateDirectory(filePath);
-            }
+            MakeFragments(sourceObject, fragments, planeObject, capMaterial, makeGap);
         }
 
         /// <summary>
-        /// メッシュをカットする
+        /// 断片を生成する
         /// </summary>
-        public static void CutTheMesh(
-            GameObject victim,
-            List<GameObject> cuttedMeshes,
-            Vector3 anchorPos,
-            Vector3 planeNormal,
-            Material capMaterial)
+        /// <param name="sourceObject"></param>
+        /// <param name="fragments"></param>
+        /// <param name="planeObject"></param>
+        /// <param name="capMaterial"></param>
+        /// <param name="makeGap"></param>
+        private static void MakeFragments(
+            GameObject sourceObject,
+            List<GameObject> fragments,
+            Transform planeObject,
+            Material capMaterial,
+            bool makeGap)
         {
-            List<GameObject> frag = new List<GameObject>();
+            if (sourceObject is null) return;
 
-            if (cuttedMeshes.Count > 0) // もすでに切られている場合
-            {
-                foreach (var mesh in cuttedMeshes)
-                {
-                    var result = 
-                        Tsujigiri.CutMesh(mesh, anchorPos, planeNormal, capMaterial, false);
-                    AddFragmentToList(frag, result.ToList());
-                }
-                AddFragmentToList(cuttedMeshes, frag);
-            }
-            else // まだ切られてない場合
-            {
-                cuttedMeshes.Clear();
-                var result = 
-                    Tsujigiri.CutMesh(victim, anchorPos, planeNormal, capMaterial, false);
-                AddFragmentToList(cuttedMeshes, result.ToList());
-            }
-        }
+            var loopCount = Random.Range(1, 10);
+            var bounds = sourceObject.GetComponent<MeshFilter>().sharedMesh.bounds;
+            var minX = bounds.min.x;
+            var minY = bounds.min.y;
+            var minZ = bounds.min.z;
+            var maxX = bounds.max.x;
+            var maxY = bounds.max.y;
+            var maxZ = bounds.max.z;
 
-        /// <summary>
-        /// 要素の重複を許さないでリストにリストを追加する
-        /// </summary>
-        /// <param name="fragmentList"></param>
-        /// <param name="sourceList"></param>
-        private static void AddFragmentToList(List<GameObject> fragmentList, List<GameObject> sourceList)
-        {
-            foreach (var obj in sourceList)
+            for (int i = 0; i < loopCount; i++)
             {
-                if (!fragmentList.Contains(obj))
-                {
-                    fragmentList.Add(obj);
-                }
+                var rotX = Random.Range(-180f, 180f);
+                var rotY = Random.Range(-180f, 180f);
+                var rotZ = Random.Range(-180f, 180f);
+                var posX = Random.Range(minX, maxX);
+                var posY = Random.Range(minY, maxY);
+                var posZ = Random.Range(minZ, maxZ);
+
+                planeObject.transform.rotation = Quaternion.Euler(rotX, rotY, rotZ);
+                planeObject.transform.position = new Vector3(posX, posY, posZ);
+
+                if (sourceObject is null) return;
+
+                TsujigiriUtility.CutTheMesh(
+                    sourceObject,
+                    fragments,
+                    planeObject.transform.position,
+                    planeObject.transform.up,
+                    capMaterial,
+                    makeGap);
+                //CutMesh(sourceObject, fragments, planeObject, capMaterial, makeGap);
             }
         }
     }

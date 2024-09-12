@@ -1,5 +1,5 @@
-using SmasherDestruction.Datas;
 using System.Collections.Generic;
+using SmasherDestruction.Datas;
 using UnityEngine;
 
 namespace SmasherDestruction.Editor
@@ -10,11 +10,24 @@ namespace SmasherDestruction.Editor
     // Ver 1.0.0
     public static class Tsujigiri
     {
-        private static Mesh _victimMesh;
-        private static SlicedMesh _topSlicedMesh = new();
-        private static SlicedMesh _bottomSlicedMesh = new();
-        private static List<Vector3> _newVerticesPos = new List<Vector3>();
         private static Plane _blade;
+        private static Mesh _victimMesh;
+        private static SlicedMesh _topSlicedMesh;
+        private static SlicedMesh _bottomSlicedMesh;
+        private static List<Vector3> _newVerticesPos;
+
+        static Tsujigiri()
+        {
+            Init();
+        }
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void Init()
+        {
+            _topSlicedMesh = new();
+            _bottomSlicedMesh = new();
+            _newVerticesPos = new();
+        }
 
         /// <summary>
         /// メッシュを切断し、切断されたメッシュを返す ラッパーメソッド
@@ -153,7 +166,12 @@ namespace SmasherDestruction.Editor
         /// <param name="index1"></param>
         /// <param name="index2"></param>
         /// <param name="index3"></param>
-        private static void CutThisFace(int subMeshIndex, bool[] sides, int index1, int index2, int index3)
+        private static void CutThisFace(
+            int subMeshIndex,
+            bool[] sides,
+            int index1,
+            int index2,
+            int index3)
         {
             // 平面の上を左、下を右 とする
             // position , normal , uv をまとめたいため、
@@ -366,17 +384,17 @@ namespace SmasherDestruction.Editor
         /// <summary>
         /// 渡された頂点の配列の基づいてポリゴンの形成をする
         /// </summary>
-        /// <param name="verts">ポリゴンの頂点リスト</param>
-        private static void FillFaceFromVertices(List<Vector3> verts)
+        /// <param name="vertices">ポリゴンの頂点リスト</param>
+        private static void FillFaceFromVertices(List<Vector3> vertices)
         {
             Vector3 center = Vector3.zero; // 中心と各頂点を結んで三角形を形成するのでこれを定義
 
-            foreach (var vert in verts)
+            foreach (var vert in vertices)
             {
                 center += vert;
             }
 
-            center /= verts.Count;
+            center /= vertices.Count;
 
             Vector3 upward = Vector3.zero;
             // 90度回転。 平面の左側を上とする
@@ -390,10 +408,10 @@ namespace SmasherDestruction.Editor
             Vector3 newUv1 = Vector3.zero;
             Vector3 newUv2 = Vector3.zero;
 
-            for (int i = 0; i < verts.Count; i++)
+            for (int i = 0; i < vertices.Count; i++)
             {
                 // 中心からの頂点へのベクトル
-                displacement = verts[i] - center;
+                displacement = vertices[i] - center;
 
                 // uv値をとる
                 newUv1 = Vector3.zero;
@@ -402,7 +420,7 @@ namespace SmasherDestruction.Editor
                 newUv1.z = .5f + Vector3.Dot(displacement, _blade.normal);
 
                 // 最後の頂点は最初の頂点を利用するのでインデックスを循環させる
-                displacement = verts[(i + 1) % verts.Count] - center;
+                displacement = vertices[(i + 1) % vertices.Count] - center;
 
                 newUv2 = Vector3.zero;
                 newUv2.x = .5f + Vector3.Dot(displacement, left);
@@ -412,8 +430,8 @@ namespace SmasherDestruction.Editor
                 _topSlicedMesh.AddTriangle(
                     new Vector3[]
                     {
-                        verts[i],
-                        verts[(i + 1) % verts.Count],
+                        vertices[i],
+                        vertices[(i + 1) % vertices.Count],
                         center
                     },
                     new Vector3[]
@@ -436,8 +454,8 @@ namespace SmasherDestruction.Editor
                 _bottomSlicedMesh.AddTriangle(
                     new Vector3[]
                     {
-                        verts[i],
-                        verts[(i + 1) % verts.Count],
+                        vertices[i],
+                        vertices[(i + 1) % vertices.Count],
                         center
                     },
                     new Vector3[]

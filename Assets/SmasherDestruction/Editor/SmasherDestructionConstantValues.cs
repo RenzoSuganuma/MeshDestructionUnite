@@ -8,6 +8,12 @@ namespace SmasherDestruction.Editor
     /// </summary>
     public static class SmasherDestructionConstantValues
     {
+        public static string AssingFragmentationTargetLabel = "Assing Fragmentation Target";
+        public static string FragmentMeshesFileNameLabel = "Fragment Meshes File Name";
+        public static string SaveToStorageFragmentMeshesFileLabel = "Save To Storage";
+        public static string ResetAllOptionsLabel = "Reset All";
+        public static string CloseWindowLabel = "Close Window";
+        
         public static int SmasherTitleFontSize = 32;
         public static int SmasherLabelFontSize = 16;
 

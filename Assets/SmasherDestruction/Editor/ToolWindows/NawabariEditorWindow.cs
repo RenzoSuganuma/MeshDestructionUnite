@@ -1,26 +1,17 @@
 ﻿using System.Collections.Generic;
 using SmasherDestruction.Editor;
-using GouwangDestruction.Core;
 using UnityEditor;
 using UnityEngine;
 
 namespace GouwangDestruction.Editor
 {
-    /// <summary>
-    /// 剛腕のエディタ画面
-    /// </summary>
-    public class GouwangEditorWindow : EditorWindow
+    public class NawabariEditorWindow : EditorWindow
     {
         /// <summary> 切断対象のオブジェクト </summary>
         public GameObject VictimObject;
 
-        /// <summary> 切断平面のオブジェクト </summary>
-        public Transform PlaneObject;
-
         /// <summary> 切断面のマテリアル </summary>
         public Material InsideMaterial;
-
-        public GameObject CutterPlane { get; set; }
 
         /// <summary>
         /// オブジェクトをウィンドウにアタッチできるように宣言
@@ -29,15 +20,13 @@ namespace GouwangDestruction.Editor
 
         private List<GameObject> _fragmentsObject = new List<GameObject>();
         private GameObject _fragmentsParent;
-        private Vector3 _planeAnchorPos;
-        private Vector3 _planeRot;
         private string _meshName;
+        private int _pointCount;
         private bool _makeGap;
 
         private void OnEnable()
         {
             _serializedObject = new SerializedObject(this);
-            _planeAnchorPos = _planeRot = Vector3.zero;
         }
 
         private void Update()
@@ -77,19 +66,10 @@ namespace GouwangDestruction.Editor
 
         private void ResetFeilds()
         {
-            if (PlaneObject is not null)
-            {
-                PlaneObject.transform.position = Vector3.zero;
-                PlaneObject.transform.rotation = Quaternion.Euler(0, 0, 0);
-            }
-
             VictimObject = null;
-            PlaneObject = null;
             InsideMaterial = null;
             _fragmentsObject = null;
             _fragmentsParent = null;
-            _planeAnchorPos = Vector3.zero;
-            _planeRot = Vector3.zero;
             _meshName = "";
             _makeGap = false;
         }
@@ -97,7 +77,7 @@ namespace GouwangDestruction.Editor
         private void Draw()
         {
             // フラグモード ラベル
-            GUILayout.Label("Gouwang",
+            GUILayout.Label("Nawabari",
                 SmasherDestructionConstantValues.GetGUIStyle_LabelSmall());
             GUILayout.Space(10);
 
@@ -107,8 +87,6 @@ namespace GouwangDestruction.Editor
             {
                 GUILayout.Space(10);
                 EditorGUILayout.PropertyField(_serializedObject.FindProperty($"{nameof(VictimObject)}"));
-                GUILayout.Space(10);
-                EditorGUILayout.PropertyField(_serializedObject.FindProperty($"{nameof(PlaneObject)}"));
                 GUILayout.Space(10);
                 EditorGUILayout.PropertyField(_serializedObject.FindProperty($"{nameof(InsideMaterial)}"));
                 GUILayout.Space(10);
@@ -125,6 +103,8 @@ namespace GouwangDestruction.Editor
             _makeGap = EditorGUILayout.Toggle("Make Gap", _makeGap);
             GUILayout.Space(10);
 
+            _pointCount = EditorGUILayout.IntField("Point Count", _pointCount);
+
             // ファイル名
             GUILayout.Label(SmasherDestructionConstantValues.FragmentMeshesFileNameLabel,
                 SmasherDestructionConstantValues.GetGUIStyle_LabelSmall());
@@ -136,10 +116,10 @@ namespace GouwangDestruction.Editor
             // メッシュ編集 実行ボタン
             if (GUILayout.Button("Frag Mesh"))
             {
-                Gouwang.ExecuteFragmentation(
+                Nawabari.ExecuteFragmentation(
+                    _pointCount,
                     VictimObject,
                     _fragmentsObject,
-                    PlaneObject,
                     InsideMaterial,
                     _makeGap);
 
@@ -166,44 +146,12 @@ namespace GouwangDestruction.Editor
 
             GUILayout.Space(10);
 
-            // 切断面 の 回転 指定
-            _planeRot = EditorGUILayout.Vector3Field("PlaneObject Rotation", _planeRot);
-            // 切断面 の 回転 リセット
-            if (EditorGUILayout.LinkButton("Reset Value"))
-            {
-                _planeRot = Vector3.zero;
-            }
-
-            GUILayout.Space(10);
-
-            // 切断面 の 位置 指定
-            _planeAnchorPos = EditorGUILayout.Vector3Field("PlaneObject Anchor-Position", _planeAnchorPos);
-            // 切断面 の 位置 リセット
-            if (EditorGUILayout.LinkButton("Reset Value"))
-            {
-                _planeAnchorPos = Vector3.zero;
-            }
-
-            GUILayout.Space(10);
-
             // リセットボタン
             if (GUILayout.Button(
-                    "Reset All",
+                    SmasherDestructionConstantValues.ResetAllOptionsLabel,
                     SmasherDestructionConstantValues.GetGUIStyle_Button()))
             {
                 ResetFeilds();
-            }
-
-            try
-            {
-                if (PlaneObject is not null)
-                {
-                    PlaneObject.transform.position = _planeAnchorPos;
-                    PlaneObject.transform.rotation = Quaternion.Euler(_planeRot);
-                }
-            }
-            catch (UnassignedReferenceException e)
-            {
             }
 
             GUILayout.Space(10);

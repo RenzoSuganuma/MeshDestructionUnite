@@ -1,4 +1,5 @@
-﻿using UnityEditor;
+﻿using System.IO;
+using UnityEditor;
 using UnityEngine;
 
 namespace GouwangDestruction.Editor
@@ -27,6 +28,18 @@ namespace GouwangDestruction.Editor
         {
             PrefabUtility.SaveAsPrefabAsset(fragmentsParent,
                 SmasherDestructionEditorUtility.CuttedMeshesPrefabFolderAbsolutePath + $"{meshName}.prefab");
+        }
+        
+        /// <summary>
+        /// 保存先ディレクトリを探す。
+        /// </summary>
+        /// <param name="filePath"></param>
+        public static void FindSaveTargetDirectory(string filePath)
+        {
+            if (!Directory.Exists(filePath))
+            {
+                Directory.CreateDirectory(filePath);
+            }
         }
     }
 }

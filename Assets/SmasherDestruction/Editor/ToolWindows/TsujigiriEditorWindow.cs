@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using GouwangDestruction.Core;
+﻿using System.Collections.Generic;
+using SmasherDestruction.Editor;
 using UnityEditor;
 using UnityEngine;
-using SmasherDestruction.Editor;
-using UnityEngine.Serialization;
 
 namespace GouwangDestruction.Editor
 {
@@ -60,7 +56,9 @@ namespace GouwangDestruction.Editor
             Draw();
 
             // ウィンドウを閉じる ボタン
-            if (GUILayout.Button("Close Window"))
+            if (GUILayout.Button(
+                    SmasherDestructionConstantValues.CloseWindowLabel
+                ))
             {
                 ResetFeilds();
 
@@ -116,7 +114,7 @@ namespace GouwangDestruction.Editor
 
             if (_serializedObject.FindProperty($"{nameof(VictimObject)}").objectReferenceValue is null)
             {
-                EditorGUILayout.TextArea("Attach The Destruction Target",
+                EditorGUILayout.TextArea(SmasherDestructionConstantValues.AssingFragmentationTargetLabel,
                     SmasherDestructionConstantValues.GetGUIStyle_LabelNotice());
                 return;
             }
@@ -126,7 +124,7 @@ namespace GouwangDestruction.Editor
             GUILayout.Space(10);
 
             // ファイル名
-            GUILayout.Label("Fragment File Name",
+            GUILayout.Label(SmasherDestructionConstantValues.FragmentMeshesFileNameLabel,
                 SmasherDestructionConstantValues.GetGUIStyle_LabelSmall());
 
             GUILayout.Space(10);
@@ -148,9 +146,10 @@ namespace GouwangDestruction.Editor
             GUILayout.Space(10);
 
             // メッシュ 保存ボタン
-            if (GUILayout.Button("Save Meshes"))
+            if (GUILayout.Button(
+                    SmasherDestructionConstantValues.SaveToStorageFragmentMeshesFileLabel
+                    ))
             {
-                CheckDirectory();
                 SaveCuttedMeshes();
             }
 
@@ -178,7 +177,7 @@ namespace GouwangDestruction.Editor
 
             // リセットボタン
             if (GUILayout.Button(
-                    "Reset All",
+                    SmasherDestructionConstantValues.ResetAllOptionsLabel,
                     SmasherDestructionConstantValues.GetGUIStyle_Button()))
             {
                 ResetFeilds();
@@ -201,9 +200,11 @@ namespace GouwangDestruction.Editor
 
         private void CheckDirectory()
         {
-            Gouwang.FindSaveTargetDirectory(SmasherDestructionEditorUtility.CuttedMeshesFolderAbsolutePath +
-                                            $"{_meshName}/");
-            Gouwang.FindSaveTargetDirectory(SmasherDestructionEditorUtility.CuttedMeshesPrefabFolderAbsolutePath);
+            SmasherDestructionEditorUtility.FindSaveTargetDirectory(
+                SmasherDestructionEditorUtility.CuttedMeshesFolderAbsolutePath +
+                $"{_meshName}/");
+            SmasherDestructionEditorUtility.FindSaveTargetDirectory(SmasherDestructionEditorUtility
+                .CuttedMeshesPrefabFolderAbsolutePath);
         }
 
         /// <summary>
@@ -213,9 +214,7 @@ namespace GouwangDestruction.Editor
         {
             if (_fragmentsObject.Count < 1) return;
 
-            Gouwang.FindSaveTargetDirectory(SmasherDestructionEditorUtility.CuttedMeshesFolderAbsolutePath +
-                                            $"{_meshName}/");
-            Gouwang.FindSaveTargetDirectory(SmasherDestructionEditorUtility.CuttedMeshesPrefabFolderAbsolutePath);
+            CheckDirectory();
 
             // コンポーネントのアタッチ
             foreach (var cuttedMesh in _fragmentsObject)

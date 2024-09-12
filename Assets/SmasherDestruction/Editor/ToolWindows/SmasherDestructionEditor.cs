@@ -28,6 +28,13 @@ namespace GouwangDestruction.Editor
             window.CutterPlane = obj;
             window.titleContent = new GUIContent("TsujigiriWindow");
         }
+        
+        [MenuItem("Window/SmasherDestruction/Nawabari")]
+        public static void ShowNawabariWindow()
+        {
+            var window = GetWindow<NawabariEditorWindow>();
+            window.titleContent = new GUIContent("NawabariWindow");
+        }
 
         static GameObject InstantiateCutterPlane()
         {
