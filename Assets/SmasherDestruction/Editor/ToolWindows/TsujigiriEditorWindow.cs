@@ -132,7 +132,8 @@ namespace GouwangDestruction.Editor
             GUILayout.Space(10);
 
             // メッシュ編集 実行ボタン
-            if (GUILayout.Button("Cut Mesh"))
+            if (GUILayout.Button("Cut Mesh",
+                    SmasherDestructionConstantValues.GetGUIStyle_ExecuteButton()))
             {
                 TsujigiriUtility.CutTheMesh(
                     VictimObject,
@@ -147,8 +148,9 @@ namespace GouwangDestruction.Editor
 
             // メッシュ 保存ボタン
             if (GUILayout.Button(
-                    SmasherDestructionConstantValues.SaveToStorageFragmentMeshesFileLabel
-                    ))
+                    SmasherDestructionConstantValues.SaveToStorageFragmentMeshesFileLabel,
+                    SmasherDestructionConstantValues.GetGUIStyle_SaveButton()
+                ))
             {
                 SaveCuttedMeshes();
             }
@@ -178,7 +180,7 @@ namespace GouwangDestruction.Editor
             // リセットボタン
             if (GUILayout.Button(
                     SmasherDestructionConstantValues.ResetAllOptionsLabel,
-                    SmasherDestructionConstantValues.GetGUIStyle_Button()))
+                    SmasherDestructionConstantValues.GetGUIStyle_ScaryButton()))
             {
                 ResetFeilds();
             }

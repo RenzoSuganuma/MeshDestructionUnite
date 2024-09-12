@@ -10,22 +10,9 @@ namespace SmasherDestruction.Editor
     /// </summary>
     public static class Nawabari
     {
-        private static List<Vector3> _points;
-        private static List<Color> _colors;
-        private static List<List<int>> _sites;
-
-        static Nawabari()
-        {
-            Init();
-        }
-        
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void Init()
-        {
-            _points = new();
-            _colors = new();
-            _sites = new();
-        }
+        private static List<Vector3> _points = new();
+        private static List<Color> _colors = new();
+        private static List<List<int>> _sites = new();
 
         /// <summary>
         /// 断片化を実行
@@ -45,7 +32,18 @@ namespace SmasherDestruction.Editor
             var mesh = victim.GetComponent<MeshFilter>().sharedMesh;
             CreatePointAndColor3D(pointCount, mesh);
             CreateSites3D(mesh);
-            MakeFragment(victim, fragments, insideMaterial, makeGap);
+            var point1 = _points[0];
+            for (int i = 1; i < _points.Count; i++)
+            {
+                var planeUp = (_points[i] - point1).normalized;
+                var planePos = ((_points[i] - point1) + point1) * .5f; // 平面を垂直二等分線として見立てる
+                TsujigiriUtility.CutTheMesh(victim, fragments, planePos, planeUp, insideMaterial, makeGap);
+            }
+            
+            // ここでリストを空っぽにしないと分割回数が増えるバグが発生する。
+            _points.Clear();
+            _colors.Clear();
+            _sites.Clear();
         }
 
         // 点と色を配列へ追加
@@ -96,21 +94,6 @@ namespace SmasherDestruction.Editor
                     // 頂点のインデックスを追加
                     _sites[ind].Add(i);
                 }
-            }
-        }
-
-        private static void MakeFragment(
-            GameObject victim,
-            List<GameObject> fragments,
-            Material insideMaterial,
-            bool makeGap)
-        {
-            var point1 = _points[0];
-            for (int i = 1; i < _points.Count; i++)
-            {
-                var planeUp = (_points[i] - point1).normalized;
-                var planePos = ((_points[i] - point1) + point1) * .5f; // 平面を垂直二等分線として見立てる
-                TsujigiriUtility.CutTheMesh(victim, fragments, planePos, planeUp, insideMaterial, makeGap);
             }
         }
     }

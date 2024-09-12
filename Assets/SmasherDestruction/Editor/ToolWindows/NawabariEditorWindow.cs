@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using SmasherDestruction.Editor;
 using UnityEditor;
 using UnityEngine;
@@ -48,13 +49,14 @@ namespace GouwangDestruction.Editor
             // ウィンドウを閉じる ボタン
             if (GUILayout.Button(
                     SmasherDestructionConstantValues.CloseWindowLabel
-                    ))
+                ))
             {
                 ResetFeilds();
 
                 _serializedObject.Dispose();
                 _serializedObject = null;
                 _ = _serializedObject;
+
                 Close();
             }
 
@@ -72,6 +74,7 @@ namespace GouwangDestruction.Editor
             _fragmentsParent = null;
             _meshName = "";
             _makeGap = false;
+            _pointCount = 0;
         }
 
         private void Draw()
@@ -114,7 +117,7 @@ namespace GouwangDestruction.Editor
             GUILayout.Space(10);
 
             // メッシュ編集 実行ボタン
-            if (GUILayout.Button("Frag Mesh"))
+            if (GUILayout.Button("Frag Mesh", SmasherDestructionConstantValues.GetGUIStyle_ExecuteButton()))
             {
                 Nawabari.ExecuteFragmentation(
                     _pointCount,
@@ -137,8 +140,9 @@ namespace GouwangDestruction.Editor
 
             // メッシュ 保存ボタン
             if (GUILayout.Button(
-                    SmasherDestructionConstantValues.SaveToStorageFragmentMeshesFileLabel
-                    ))
+                    SmasherDestructionConstantValues.SaveToStorageFragmentMeshesFileLabel,
+                    SmasherDestructionConstantValues.GetGUIStyle_SaveButton()
+                ))
             {
                 CheckDirectory();
                 SaveCuttedMeshes();
@@ -149,7 +153,7 @@ namespace GouwangDestruction.Editor
             // リセットボタン
             if (GUILayout.Button(
                     SmasherDestructionConstantValues.ResetAllOptionsLabel,
-                    SmasherDestructionConstantValues.GetGUIStyle_Button()))
+                    SmasherDestructionConstantValues.GetGUIStyle_ScaryButton()))
             {
                 ResetFeilds();
             }

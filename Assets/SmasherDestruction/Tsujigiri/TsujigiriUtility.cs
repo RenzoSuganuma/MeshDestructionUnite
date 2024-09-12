@@ -9,13 +9,8 @@ namespace SmasherDestruction.Editor
     public static class TsujigiriUtility
     {
         /// <summary> メッシュをカットする </summary>
-        /// <param name="victim"></param>
-        /// <param name="cuttedMeshes"></param>
-        /// <param name="anchorPos"></param>
-        /// <param name="planeNormal"></param>
-        /// <param name="insideMaterial"></param>
-        /// <param name="makeGap"></param>
-        public static void CutTheMesh(GameObject victim,
+        public static void CutTheMesh(
+            GameObject victim,
             List<GameObject> cuttedMeshes,
             Vector3 anchorPos,
             Vector3 planeNormal,

@@ -12,22 +12,9 @@ namespace SmasherDestruction.Editor
     {
         private static Plane _blade;
         private static Mesh _victimMesh;
-        private static SlicedMesh _topSlicedMesh;
-        private static SlicedMesh _bottomSlicedMesh;
-        private static List<Vector3> _newVerticesPos;
-
-        static Tsujigiri()
-        {
-            Init();
-        }
-
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void Init()
-        {
-            _topSlicedMesh = new();
-            _bottomSlicedMesh = new();
-            _newVerticesPos = new();
-        }
+        private static SlicedMesh _topSlicedMesh = new();
+        private static SlicedMesh _bottomSlicedMesh = new();
+        private static List<Vector3> _newVerticesPos = new();
 
         /// <summary>
         /// メッシュを切断し、切断されたメッシュを返す ラッパーメソッド
