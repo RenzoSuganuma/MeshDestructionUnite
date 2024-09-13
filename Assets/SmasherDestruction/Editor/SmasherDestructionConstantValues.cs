@@ -65,7 +65,7 @@ namespace SmasherDestruction.Editor
             return gui;
         }
 
-        public static GUIStyle GetGUIStyle_Button()
+        public static GUIStyle GetGUIStyle_ScaryButton()
         {
             var gui = new GUIStyle(GUI.skin.button);
             gui.fontSize = 12;
@@ -74,6 +74,30 @@ namespace SmasherDestruction.Editor
             gui.richText = true;
             gui.normal.textColor = Color.white;
             gui.hover.textColor = Color.red;
+            return gui;
+        }
+        
+        public static GUIStyle GetGUIStyle_SaveButton()
+        {
+            var gui = new GUIStyle(GUI.skin.button);
+            gui.fontSize = 12;
+            gui.fontStyle = FontStyle.Bold;
+            gui.alignment = TextAnchor.MiddleCenter;
+            gui.richText = true;
+            gui.normal.textColor = Color.white;
+            gui.hover.textColor = Color.green;
+            return gui;
+        }
+        
+        public static GUIStyle GetGUIStyle_ExecuteButton()
+        {
+            var gui = new GUIStyle(GUI.skin.button);
+            gui.fontSize = 12;
+            gui.fontStyle = FontStyle.Bold;
+            gui.alignment = TextAnchor.MiddleCenter;
+            gui.richText = true;
+            gui.normal.textColor = Color.white;
+            gui.hover.textColor = Color.yellow;
             return gui;
         }
 

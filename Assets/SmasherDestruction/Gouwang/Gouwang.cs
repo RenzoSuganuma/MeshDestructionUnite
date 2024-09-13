@@ -75,7 +75,6 @@ namespace GouwangDestruction.Core
                     planeObject.transform.up,
                     capMaterial,
                     makeGap);
-                //CutMesh(sourceObject, fragments, planeObject, capMaterial, makeGap);
             }
         }
     }

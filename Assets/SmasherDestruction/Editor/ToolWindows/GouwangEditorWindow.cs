@@ -59,7 +59,7 @@ namespace GouwangDestruction.Editor
             // ウィンドウを閉じる ボタン
             if (GUILayout.Button(
                     SmasherDestructionConstantValues.CloseWindowLabel
-                    ))
+                ))
             {
                 ResetFeilds();
 
@@ -134,7 +134,8 @@ namespace GouwangDestruction.Editor
             GUILayout.Space(10);
 
             // メッシュ編集 実行ボタン
-            if (GUILayout.Button("Frag Mesh"))
+            if (GUILayout.Button("Frag Mesh",
+                    SmasherDestructionConstantValues.GetGUIStyle_ExecuteButton()))
             {
                 Gouwang.ExecuteFragmentation(
                     VictimObject,
@@ -157,8 +158,9 @@ namespace GouwangDestruction.Editor
 
             // メッシュ 保存ボタン
             if (GUILayout.Button(
-                    SmasherDestructionConstantValues.SaveToStorageFragmentMeshesFileLabel
-                    ))
+                    SmasherDestructionConstantValues.SaveToStorageFragmentMeshesFileLabel,
+                    SmasherDestructionConstantValues.GetGUIStyle_SaveButton()
+                ))
             {
                 CheckDirectory();
                 SaveCuttedMeshes();
@@ -189,7 +191,7 @@ namespace GouwangDestruction.Editor
             // リセットボタン
             if (GUILayout.Button(
                     "Reset All",
-                    SmasherDestructionConstantValues.GetGUIStyle_Button()))
+                    SmasherDestructionConstantValues.GetGUIStyle_ScaryButton()))
             {
                 ResetFeilds();
             }
