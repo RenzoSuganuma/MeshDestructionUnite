@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using System.Linq;
 
 namespace SmasherDestruction.Editor
 {
     /// <summary>
     /// ３次元ボロノイ区分けの機能を提供する
     /// </summary>
-    public static class Nawabari
+    public static class NawabariModoki
     {
         private static List<Vector3> _points = new();
         private static List<Color> _colors = new();
@@ -32,14 +33,36 @@ namespace SmasherDestruction.Editor
             var mesh = victim.GetComponent<MeshFilter>().sharedMesh;
             CreatePointAndColor3D(pointCount, mesh);
             CreateSites3D(mesh);
-            var point1 = _points[0];
-            for (int i = 1; i < _points.Count; i++)
+
+            var duplicated = GameObject.Instantiate(victim);
+
+            int ind = Random.Range(0, _points.Count);
+
+            var p = _points[ind];
+
+            // p 以外の母点のリストを求める
+            Vector3[] othersArray = new Vector3[_points.Count];
+            _points.CopyTo(othersArray);
+            // p 以外の母点のリスト
+            var otherList = othersArray.ToList();
+            otherList.RemoveAt(ind); // 点pが残っているのでそれを除外
+
+            // 最終的に残る断片
+            // 切断前のオブジェクトを複製
+            for (int k = 0; k < otherList.Count; k++)
             {
-                var planeUp = (_points[i] - point1).normalized;
-                var planePos = ((_points[i] - point1) + point1) * .5f; // 平面を垂直二等分線として見立てる
-                TsujigiriUtility.CutTheMesh(victim, fragments, planePos, planeUp, insideMaterial, makeGap);
+                var planeUp = (otherList[k] - p).normalized; // 抽出対象 領域 p は 法線の逆側。 
+                var planePos = ((otherList[k] - p) + p) * .5f; // 平面を垂直二等分線として見立てる
+                TsujigiriUtility.CutTheMesh(
+                    victim,
+                    fragments,
+                    planePos,
+                    planeUp,
+                    insideMaterial,
+                    makeGap);
             }
-            
+
+
             // ここでリストを空っぽにしないと分割回数が増えるバグが発生する。
             _points.Clear();
             _colors.Clear();

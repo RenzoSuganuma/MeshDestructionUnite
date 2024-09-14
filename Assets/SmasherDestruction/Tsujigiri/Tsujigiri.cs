@@ -12,8 +12,8 @@ namespace SmasherDestruction.Editor
     {
         private static Plane _blade;
         private static Mesh _victimMesh;
-        private static SlicedMesh _topSlicedMesh = new();
-        private static SlicedMesh _bottomSlicedMesh = new();
+        private static SlicedMesh _leftMesh = new();
+        private static SlicedMesh _rightMesh = new();
         private static List<Vector3> _newVerticesPos = new();
 
         /// <summary>
@@ -42,8 +42,8 @@ namespace SmasherDestruction.Editor
 
             // 左右に分離したメッシュデータ、新しく追加した頂点群をクリア
             _newVerticesPos.Clear();
-            _topSlicedMesh.ClearAll();
-            _bottomSlicedMesh.ClearAll();
+            _leftMesh.ClearAll();
+            _rightMesh.ClearAll();
 
             // 平面の左右に頂点v1,v2,v3があるかのフラグ
             bool[] sides = new bool[3];
@@ -59,8 +59,8 @@ namespace SmasherDestruction.Editor
                 indices = _victimMesh.GetIndices(submesh);
 
                 // サブメッシュ１つ分のインデックスリスト
-                _topSlicedMesh.SubIndices.Add(new List<int>());
-                _bottomSlicedMesh.SubIndices.Add(new List<int>());
+                _leftMesh.SubIndices.Add(new List<int>());
+                _rightMesh.SubIndices.Add(new List<int>());
 
                 // サブメッシュのインデックス数分ループ
                 for (int i = 0; i < indices.Length; i += 3)
@@ -80,11 +80,11 @@ namespace SmasherDestruction.Editor
                         // 左右にあるかに応じ、トライアングルの追加
                         if (sides[0])
                         {
-                            _topSlicedMesh.AddTriangle(v1, v2, v3, submesh, ref _victimMesh);
+                            _leftMesh.AddTriangle(v1, v2, v3, submesh, ref _victimMesh);
                         }
                         else
                         {
-                            _bottomSlicedMesh.AddTriangle(v1, v2, v3, submesh, ref _victimMesh);
+                            _rightMesh.AddTriangle(v1, v2, v3, submesh, ref _victimMesh);
                         }
                     }
                     else // 切断面の上下にある場合には切断処理
@@ -100,8 +100,8 @@ namespace SmasherDestruction.Editor
 
             if (materials[materials.Length - 1].name != capMat.name)
             {
-                _topSlicedMesh.SubIndices.Add(new List<int>());
-                _bottomSlicedMesh.SubIndices.Add(new List<int>());
+                _leftMesh.SubIndices.Add(new List<int>());
+                _rightMesh.SubIndices.Add(new List<int>());
 
                 Material[] newMaterials = new Material[materials.Length + 1];
 
@@ -116,19 +116,19 @@ namespace SmasherDestruction.Editor
             FillFace();
 
             // 左側のメッシュを生成
-            var leftHalfMesh = _topSlicedMesh.ToMesh();
+            var leftHalfMesh = _leftMesh.ToMesh();
             // 右側のメッシュを生成
-            var rightHalfMesh = _bottomSlicedMesh.ToMesh();
+            var rightHalfMesh = _rightMesh.ToMesh();
 
             // 元のオブジェクトを左側に
-            sourceObject.name = "LeftSide";
+            sourceObject.name = "Left";
             sourceObject.GetComponent<MeshFilter>().mesh = leftHalfMesh;
             GameObject leftObj = sourceObject;
             leftObj.GetComponent<MeshRenderer>().materials = materials;
 
             // 右側は生成
             GameObject rightObj =
-                new GameObject("RightSide",
+                new GameObject("Right",
                     typeof(MeshFilter),
                     typeof(MeshRenderer));
             rightObj.transform.position = sourceObject.transform.position;
@@ -273,14 +273,14 @@ namespace SmasherDestruction.Editor
 
             // 左側
             // 【縮退三角形的に追加】
-            _topSlicedMesh.AddTriangle(
+            _leftMesh.AddTriangle(
                 new Vector3[] { leftVertices[0].Position, newVertex1, newVertex2 },
                 new Vector3[] { leftVertices[0].Normal, newNormal1, newNormal2 },
                 new Vector2[] { leftVertices[0].Uv, newUv1, newUv2 },
                 newNormal1,
                 subMeshIndex
             );
-            _topSlicedMesh.AddTriangle(
+            _leftMesh.AddTriangle(
                 new Vector3[] { leftVertices[0].Position, leftVertices[1].Position, newVertex2 },
                 new Vector3[] { leftVertices[0].Normal, leftVertices[1].Normal, newNormal2 },
                 new Vector2[] { leftVertices[0].Uv, leftVertices[1].Uv, newUv2 },
@@ -293,14 +293,14 @@ namespace SmasherDestruction.Editor
             #region 右側三角形
 
             // 右側
-            _bottomSlicedMesh.AddTriangle(
+            _rightMesh.AddTriangle(
                 new Vector3[] { rightVertices[0].Position, newVertex1, newVertex2 },
                 new Vector3[] { rightVertices[0].Normal, newNormal1, newNormal2 },
                 new Vector2[] { rightVertices[0].Uv, newUv1, newUv2 },
                 newNormal1,
                 subMeshIndex
             );
-            _bottomSlicedMesh.AddTriangle(
+            _rightMesh.AddTriangle(
                 new Vector3[] { rightVertices[0].Position, rightVertices[1].Position, newVertex2 },
                 new Vector3[] { rightVertices[0].Normal, rightVertices[1].Normal, newNormal2 },
                 new Vector2[] { rightVertices[0].Uv, rightVertices[1].Uv, newUv2 },
@@ -414,7 +414,7 @@ namespace SmasherDestruction.Editor
                 newUv2.y = .5f + Vector3.Dot(displacement, upward);
                 newUv2.z = .5f + Vector3.Dot(displacement, _blade.normal);
 
-                _topSlicedMesh.AddTriangle(
+                _leftMesh.AddTriangle(
                     new Vector3[]
                     {
                         vertices[i],
@@ -435,10 +435,10 @@ namespace SmasherDestruction.Editor
                     },
                     -_blade.normal,
                     // カット面をサブメッシュとして登録
-                    _topSlicedMesh.SubIndices.Count - 1
+                    _leftMesh.SubIndices.Count - 1
                 );
 
-                _bottomSlicedMesh.AddTriangle(
+                _rightMesh.AddTriangle(
                     new Vector3[]
                     {
                         vertices[i],
@@ -459,7 +459,7 @@ namespace SmasherDestruction.Editor
                     },
                     _blade.normal,
                     // カット面をサブメッシュとして登録
-                    _bottomSlicedMesh.SubIndices.Count - 1
+                    _rightMesh.SubIndices.Count - 1
                 );
             }
         }

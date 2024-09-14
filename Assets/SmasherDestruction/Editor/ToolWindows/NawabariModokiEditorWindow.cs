@@ -8,7 +8,7 @@ using Random = UnityEngine.Random;
 
 namespace GouwangDestruction.Editor
 {
-    public class NawabariEditorWindow : EditorWindow
+    public class NawabariModokiEditorWindow : EditorWindow
     {
         /// <summary> 切断対象のオブジェクト </summary>
         public GameObject VictimObject;
@@ -85,7 +85,7 @@ namespace GouwangDestruction.Editor
         private void Draw()
         {
             // フラグモード ラベル
-            GUILayout.Label("Nawabari",
+            GUILayout.Label("NawabariModoki",
                 SmasherDestructionConstantValues.GetGUIStyle_LabelSmall());
             GUILayout.Space(10);
 
@@ -124,7 +124,7 @@ namespace GouwangDestruction.Editor
             // メッシュ編集 実行ボタン
             if (GUILayout.Button("Frag Mesh", SmasherDestructionConstantValues.GetGUIStyle_ExecuteButton()))
             {
-                Nawabari.ExecuteFragmentation(
+                NawabariModoki.ExecuteFragmentation(
                     _pointCount,
                     VictimObject,
                     _fragmentsObjects,
