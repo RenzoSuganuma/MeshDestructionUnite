@@ -84,6 +84,39 @@ namespace SmasherDestruction.Editor
                         Random.Range(0f, 1.0f),
                         Random.Range(0f, 1.0f));
 
+                if (_points.Count > 5)
+                {
+                    var d = _points[_points.Count - 1] - pnt; // 最後に追加した母点との距離
+                    var s = mesh.bounds.max - mesh.bounds.min; // メッシュのサイズのベクトル
+                    if (d.magnitude <= (s / 2f).magnitude) // 距離がメッシュのサイズの 1/3以下の時にはオフセットをかける
+                    {
+                        if (Vector3.Dot(_points[_points.Count - 1], pnt) > 0)
+                        {
+                            if (Vector3.Dot(d, s) > 0)
+                            {
+                                pnt.x += Random.Range(0, extents.x);
+                                pnt.y += Random.Range(0, extents.y);
+                                pnt.z += Random.Range(0, extents.z);
+                            }
+                            else
+                            {
+                                pnt.x -= Random.Range(0, extents.x);
+                                pnt.y -= Random.Range(0, extents.y);
+                                pnt.z -= Random.Range(0, extents.z);
+                            }
+                        }
+                        else
+                        {
+                            if (Vector3.Dot(d, s) > 0)
+                            {
+                                pnt.x -= Random.Range(0, extents.x);
+                                pnt.y -= Random.Range(0, extents.y);
+                                pnt.z -= Random.Range(0, extents.z);
+                            }
+                        }
+                    }
+                }
+
                 _points.Add(pnt);
                 _colors.Add(c);
                 _sites.Add(new List<int>());
