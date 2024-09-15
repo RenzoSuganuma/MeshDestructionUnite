@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
 namespace LearningVoronoi_Dalanuay
 {
-
 // 参考文献
 // https://qiita.com/gis/items/c1762d9683355339ee07
 // https://taq.hatenadiary.jp/entry/2022/12/25/160000#%E6%AD%A3%E6%94%BB%E6%B3%95
@@ -13,6 +13,18 @@ namespace LearningVoronoi_Dalanuay
     public struct Point2D_L
     {
         public int x, y;
+
+        public Point2D_L(int x, int y)
+        {
+            this.x = x;
+            this.y = y;
+        }
+
+        public Point2D_L(float x, float y)
+        {
+            this.x = (int)x;
+            this.y = (int)y;
+        }
     }
 
     public static class VoronoiUtil2D_L
@@ -28,11 +40,67 @@ namespace LearningVoronoi_Dalanuay
             int yd = y - point2DL.y;
             return (xd * xd) + (yd * yd);
         }
+
+        public static bool TriangulatePolygonSubFuncInCyrcle
+            (Vector2 p1, Vector2 p2, Vector2 p3, out Vector2 center)
+        {
+            center = Vector2Int.one * -1;
+
+            if (Mathf.Abs(p1.y - p2.y) < float.Epsilon
+                && Mathf.Abs(p2.y - p3.y) < float.Epsilon)
+            {
+                return false;
+            }
+
+            float m1, m2, mx1, mx2, my1, my2, xc, yc;
+            if (Mathf.Abs(p2.y - p1.y) < float.Epsilon)
+            {
+                m2 = -(p3.x - p2.x) / (p3.y - p3.y);
+                mx2 = (p2.x + p3.x) * .5f;
+                my2 = (p2.y + p3.y) * .5f;
+                xc = (p2.x + p1.x) * .5f;
+                yc = m2 * (xc - mx2) + my2;
+            }
+            else if (Mathf.Abs(p3.y - p2.y) < float.Epsilon)
+            {
+                m1 = -(p2.x - p1.x) / (p2.y - p1.y);
+                mx1 = (p1.x + p2.x) * .5f;
+                my1 = (p1.y + p2.y) * .5f;
+                xc = (p3.x + p2.x) * .5f;
+                yc = m1 * (xc - mx1) + my1;
+            }
+            else
+            {
+                m1 = -(p2.x - p1.x) / (p2.y - p1.y);
+                m2 = -(p3.x - p2.x) / (p3.y - p1.y);
+                mx1 = (p1.x + p2.x) * .5f;
+                mx2 = (p2.x + p3.x) * .5f;
+                my1 = (p1.y + p2.y) * .5f;
+                my2 = (p2.y + p3.y) * .5f;
+                xc = (m1 * mx1 - m2 * mx2 - my2 - my1) / (m1 - m2);
+                yc = m1 * (xc - mx1) + my1;
+            }
+
+            float dx = p2.x - xc;
+            float dy = p2.y - yc;
+            float rsqr = dx * dx + dy * dy;
+            float dx1 = p1.x - xc;
+            float dy1 = p1.y - yc;
+            double dsqr = dx1 * dx1 + dy1 * dy1;
+            var cond = (dsqr <= rsqr);
+            if (cond)
+            {
+                center = new Vector2(xc, yc);
+            }
+
+            return cond;
+        }
     }
 
     public class Voronoi2D_L
     {
         private List<Point2D_L> _points = new();
+        private List<Point2D_L> _voronoiPoints = new();
         private List<Color> _colors = new();
         private List<GameObject> _objects = new();
 
@@ -98,16 +166,10 @@ namespace LearningVoronoi_Dalanuay
             foreach (var point in _points)
             {
                 int x = point.x, y = point.y;
-                for (int i = -1; i < 2; i++)
-                {
-                    for (int j = -1; j < 2; j++)
-                    {
-                        var obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                        obj.transform.position = new Vector3(x + i, y + j, 0);
-                        obj.GetComponent<MeshRenderer>().material.color = Color.black;
-                        _objects.Add(obj);
-                    }
-                }
+                var obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                obj.transform.position = new Vector3(x, y, 0);
+                obj.GetComponent<MeshRenderer>().material.color = Color.black;
+                _objects.Add(obj);
             }
         }
     }
@@ -119,7 +181,7 @@ namespace LearningVoronoi_Dalanuay
         // Start is called once before the first execution of Update after the MonoBehaviour is created
         void Start()
         {
-            v.Make(25);
+            v.Make(5);
         }
 
         // Update is called once per frame
