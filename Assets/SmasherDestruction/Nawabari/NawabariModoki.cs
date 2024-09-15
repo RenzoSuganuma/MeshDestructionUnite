@@ -51,6 +51,9 @@ namespace SmasherDestruction.Editor
             // 切断前のオブジェクトを複製
             for (int k = 0; k < otherList.Count; k++)
             {
+                // var dis = otherList[k] - p;
+                // var size = mesh.bounds.max - mesh.bounds.min;
+
                 var planeUp = (otherList[k] - p).normalized; // 抽出対象 領域 p は 法線の逆側。 
                 var planePos = ((otherList[k] - p) + p) * .5f; // 平面を垂直二等分線として見立てる
                 TsujigiriUtility.CutTheMesh(
