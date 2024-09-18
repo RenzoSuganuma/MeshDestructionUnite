@@ -128,6 +128,7 @@ public static class Nawabari
     {
         var slicedMesh = new SeperatedMesh();
 
+        // 三角形単位でループを実行
         for (int i = 0; i < mesh.triangles.Length; i += 3)
         {
             var v1 = mesh.triangles[i];
@@ -139,7 +140,7 @@ public static class Nawabari
             // v1 -- v2 -- v3 のうち少なくとも１つほかの２つと所属する領域が違うなら
             // その３つの頂点は境界線を構成する
             // パターン （条件）
-            // v1->v2,v3(1) | v2->v1,v3(2) | v3->v1,v2(3)
+            // v1->v2,v3 (1) | v2->v1,v3 (2) | v3->v1,v2 (3)
             // nether = v1 -> v2 | v1 -> v3 | v2 -> v3 ３つとも違う所属 (4)
 
             // 条件
