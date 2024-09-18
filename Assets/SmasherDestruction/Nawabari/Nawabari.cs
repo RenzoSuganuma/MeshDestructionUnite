@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using SmasherDestruction.Datas;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -125,13 +126,12 @@ public static class Nawabari
     // $ ↓ バグってます ↓ $
     private static Mesh GetSeparatedMeshes(Mesh mesh)
     {
+        SlicedMesh slicedMesh = new SlicedMesh();
         Mesh m = new Mesh();
         List<Vector3> vertices = new();
         List<Vector3> normals = new();
         List<Vector2> uvs = new();
         List<int> triangles = new();
-
-        m = mesh;
 
         // 領域１
         foreach (var i in _sites[0])
@@ -155,30 +155,33 @@ public static class Nawabari
                 triangles.Add(v1);
                 triangles.Add(v2);
                 triangles.Add(v3);
+                slicedMesh.SubIndices.Add(new List<int>());
+                slicedMesh.AddTriangle(v1, v2, v3, 0, ref mesh);
                 // 個々の処理自体は正しく動作しているように見えておかしな頂点の重複がある
             }
         }
 
-        for (int i = 0; i < triangles.Count; i++) // 領域内の三角形を可視化
-        {
-            var c = new Color(Random.Range(0, 1f), Random.Range(0, 1f), Random.Range(0, 1f));
-            
-            var obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            obj.transform.localScale = Vector3.one * 0.05f;
-            obj.transform.localPosition = mesh.vertices[triangles[i]];
-            obj.GetComponent<MeshRenderer>().material.color = c;
 
-            var obj1 = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            obj1.transform.localScale = Vector3.one * 0.05f;
-            obj1.transform.localPosition = mesh.vertices[triangles[i + 1]];
-            obj1.GetComponent<MeshRenderer>().material.color = c;
+        // for (int i = 0; i < triangles.Count; i++) // 領域内の三角形を可視化
+        // {
+        //     var c = new Color(Random.Range(0, 1f), Random.Range(0, 1f), Random.Range(0, 1f));
+        //
+        //     var obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        //     obj.transform.localScale = Vector3.one * 0.05f;
+        //     obj.transform.localPosition = mesh.vertices[triangles[i]];
+        //     obj.GetComponent<MeshRenderer>().material.color = c;
+        //
+        //     var obj1 = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        //     obj1.transform.localScale = Vector3.one * 0.05f;
+        //     obj1.transform.localPosition = mesh.vertices[triangles[i + 1]];
+        //     obj1.GetComponent<MeshRenderer>().material.color = c;
+        //
+        //     var obj2 = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        //     obj2.transform.localScale = Vector3.one * 0.05f;
+        //     obj2.transform.localPosition = mesh.vertices[triangles[i + 2]];
+        //     obj2.GetComponent<MeshRenderer>().material.color = c;
+        // }
 
-            var obj2 = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            obj2.transform.localScale = Vector3.one * 0.05f;
-            obj2.transform.localPosition = mesh.vertices[triangles[i + 2]];
-            obj2.GetComponent<MeshRenderer>().material.color = c;
-        }
-
-        return m;
+        return slicedMesh.ToMesh();
     }
 }
