@@ -123,23 +123,10 @@ public static class Nawabari
         }
     }
 
-    // $ ↓ バグってます ↓ $
+    // $ ↓ 領域１しかまだ抽出できない ↓ $
     private static Mesh GetSeparatedMeshes(Mesh mesh)
     {
-        SlicedMesh slicedMesh = new SlicedMesh();
-        Mesh m = new Mesh();
-        List<Vector3> vertices = new();
-        List<Vector3> normals = new();
-        List<Vector2> uvs = new();
-        List<int> triangles = new();
-
-        // 領域１
-        foreach (var i in _sites[0])
-        {
-            vertices.Add(mesh.vertices[i]);
-            uvs.Add(mesh.uv[i]);
-            normals.Add(mesh.normals[i]);
-        }
+        var slicedMesh = new SeperatedMesh();
 
         for (int i = 0; i < mesh.triangles.Length; i += 3)
         {
@@ -147,40 +134,75 @@ public static class Nawabari
             var v2 = mesh.triangles[i + 1];
             var v3 = mesh.triangles[i + 2];
 
+            // 境界線を構成する頂点の抽出
+            // 条件 
+            // v1 -- v2 -- v3 のうち少なくとも１つほかの２つと所属する領域が違うなら
+            // その３つの頂点は境界線を構成する
+            // パターン （条件）
+            // v1->v2,v3(1) | v2->v1,v3(2) | v3->v1,v2(3)
+            // nether = v1 -> v2 | v1 -> v3 | v2 -> v3 ３つとも違う所属 (4)
+
+            // 条件
+            bool cond1, cond2, cond3, nether;
+            // 各頂点の所属領域
+            int s1 = 0, s2 = 0, s3 = 0;
+
+            // 各頂点が所属する領域を求める
+            for (int j = 0; j < _sites.Count; j++)
+            {
+                var site = _sites[j];
+                {
+                    if (site.Contains(v1))
+                    {
+                        s1 = j;
+                    }
+
+                    if (site.Contains(v2))
+                    {
+                        s2 = j;
+                    }
+
+                    if (site.Contains(v3))
+                    {
+                        s3 = j;
+                    }
+                }
+            }
+
+            // パターンを求める
+            nether = (s1 != s2 && s1 != s3 && s2 != s3); // (4)
+            cond1 = (s2 == s3 && s2 != s1); // (1)
+            cond2 = (s1 == s3 && s1 != s2); // (2)
+            cond3 = (s1 == s2 && s1 != s3); // (3)
+
             // 三角形単位で判定をする。領域内の三角形のみ追加
             if ((_sites[0].Contains(v1)
                  || _sites[0].Contains(v2)
                  || _sites[0].Contains(v3)))
             {
-                triangles.Add(v1);
-                triangles.Add(v2);
-                triangles.Add(v3);
+                // ここで境界線の可視化
+                if (cond1 || cond2 || cond3 || nether)
+                {
+                    var obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    obj.transform.localScale = Vector3.one * 0.05f;
+                    obj.transform.localPosition = mesh.vertices[v1];
+
+                    var obj1 = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    obj1.transform.localScale = Vector3.one * 0.05f;
+                    obj1.transform.localPosition = mesh.vertices[v2];
+
+                    var obj2 = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    obj2.transform.localScale = Vector3.one * 0.05f;
+                    obj2.transform.localPosition = mesh.vertices[v3];
+                }
+                // () --- ()
+
+
                 slicedMesh.SubIndices.Add(new List<int>());
                 slicedMesh.AddTriangle(v1, v2, v3, 0, ref mesh);
                 // 個々の処理自体は正しく動作しているように見えておかしな頂点の重複がある
             }
         }
-
-
-        // for (int i = 0; i < triangles.Count; i++) // 領域内の三角形を可視化
-        // {
-        //     var c = new Color(Random.Range(0, 1f), Random.Range(0, 1f), Random.Range(0, 1f));
-        //
-        //     var obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        //     obj.transform.localScale = Vector3.one * 0.05f;
-        //     obj.transform.localPosition = mesh.vertices[triangles[i]];
-        //     obj.GetComponent<MeshRenderer>().material.color = c;
-        //
-        //     var obj1 = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        //     obj1.transform.localScale = Vector3.one * 0.05f;
-        //     obj1.transform.localPosition = mesh.vertices[triangles[i + 1]];
-        //     obj1.GetComponent<MeshRenderer>().material.color = c;
-        //
-        //     var obj2 = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        //     obj2.transform.localScale = Vector3.one * 0.05f;
-        //     obj2.transform.localPosition = mesh.vertices[triangles[i + 2]];
-        //     obj2.GetComponent<MeshRenderer>().material.color = c;
-        // }
 
         return slicedMesh.ToMesh();
     }

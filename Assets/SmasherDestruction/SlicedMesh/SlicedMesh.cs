@@ -4,7 +4,7 @@ using UnityEngine;
 namespace SmasherDestruction.Datas
 {
     /// <summary> 切断されたメッシュ情報を一時的に保存する時に活用する </summary>
-    public sealed class SlicedMesh
+    public class SlicedMesh
     {
         /// <summary>
         /// 頂点リスト
