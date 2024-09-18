@@ -124,21 +124,9 @@ namespace GouwangDestruction.Editor
             // メッシュ編集 実行ボタン
             if (GUILayout.Button("Frag Mesh", SmasherDestructionConstantValues.GetGUIStyle_ExecuteButton()))
             {
-                var m = VictimObject.GetComponent<MeshFilter>().sharedMesh;
+                var m = VictimObject.GetComponent<MeshFilter>().mesh;
                 var vertices = m.vertices;
                 Nawabari.CreateFragmentedMeshes(_pointCount , m);
-
-                foreach (var site in Nawabari.Sites)
-                {
-                    var c = new Color(Random.Range(.1f, 1f), Random.Range(.1f, 1f), Random.Range(.1f, 1f));
-                    foreach (var pos in site)
-                    {
-                        var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                        cube.transform.localPosition = vertices[pos];
-                        cube.transform.localScale = Vector3.one * .05f;
-                        cube.GetComponent<MeshRenderer>().material.color = c;
-                    }
-                }
             }
 
             GUILayout.Space(10);
