@@ -17,6 +17,11 @@ public static class Nawabari
     private static List<Vector3> _points = new();
 
     /// <summary>
+    /// 各領域の境界線を構成する頂点のインデックスのリスト
+    /// </summary>
+    private static List<List<int>> _borders = new();
+
+    /// <summary>
     /// 頂点インデックスのリストを格納しているリスト
     /// </summary>
     private static List<List<int>> _sites = new();
@@ -152,21 +157,19 @@ public static class Nawabari
             for (int j = 0; j < _sites.Count; j++)
             {
                 var site = _sites[j];
+                if (site.Contains(v1))
                 {
-                    if (site.Contains(v1))
-                    {
-                        s1 = j;
-                    }
+                    s1 = j;
+                }
 
-                    if (site.Contains(v2))
-                    {
-                        s2 = j;
-                    }
+                if (site.Contains(v2))
+                {
+                    s2 = j;
+                }
 
-                    if (site.Contains(v3))
-                    {
-                        s3 = j;
-                    }
+                if (site.Contains(v3))
+                {
+                    s3 = j;
                 }
             }
 
