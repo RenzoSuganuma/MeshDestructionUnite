@@ -189,6 +189,8 @@ public static class Nawabari
             cond1 = (s2 == s3 && s2 != s1); // (1)
             cond2 = (s1 == s3 && s1 != s2); // (2)
             cond3 = (s1 == s2 && s1 != s3); // (3)
+            
+            // NOTE: ２つの領域に存在する辺が領域の境界線を構成するはず
 
             for (int j = 0; j < _sites.Count; j++)
             {
