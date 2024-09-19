@@ -39,8 +39,11 @@ public static class Nawabari
         CreateSites(mesh.vertices);
         var ms = GetSeparatedMeshes(mesh);
 
-        var obj = new GameObject("sphere", new[] { typeof(MeshFilter), typeof(MeshRenderer) });
-        obj.GetComponent<MeshFilter>().sharedMesh = ms;
+        for (int i = 0; i < ms.Length; i++)
+        {
+            var obj = new GameObject($"sphere{i}", new[] { typeof(MeshFilter), typeof(MeshRenderer) });
+            obj.GetComponent<MeshFilter>().sharedMesh = ms[i].ToMesh();
+        }
 
         return;
         // 領域分けした頂点の可視化
@@ -61,6 +64,7 @@ public static class Nawabari
     {
         _points.Clear();
         _sites.Clear();
+        _borders.Clear();
     }
 
     /// <summary>
@@ -108,10 +112,11 @@ public static class Nawabari
                 }
             }
 
+            // 頂点のインデックスを追加
+            // 重複は削除
             if (ind > -1)
             {
-                // 頂点のインデックスを追加
-                // 重複は削除
+                // 先に重複を削除しておく
                 for (int j = 0; j < _sites.Count; j++)
                 {
                     if (j != ind)
@@ -129,9 +134,14 @@ public static class Nawabari
     }
 
     // $ ↓ 領域１しかまだ抽出できない ↓ $
-    private static Mesh GetSeparatedMeshes(Mesh mesh)
+    private static SeperatedMesh[] GetSeparatedMeshes(Mesh mesh)
     {
-        var slicedMesh = new SeperatedMesh();
+        var slicedMesh = new SeperatedMesh[_sites.Count];
+
+        for (int i = 0; i < _sites.Count; i++)
+        {
+            slicedMesh[i] = new SeperatedMesh();
+        }
 
         // 三角形単位でループを実行
         for (int i = 0; i < mesh.triangles.Length; i += 3)
@@ -156,6 +166,7 @@ public static class Nawabari
             // 各頂点が所属する領域を求める
             for (int j = 0; j < _sites.Count; j++)
             {
+                _borders.Add(new List<int>());
                 var site = _sites[j];
                 if (site.Contains(v1))
                 {
@@ -179,35 +190,41 @@ public static class Nawabari
             cond2 = (s1 == s3 && s1 != s2); // (2)
             cond3 = (s1 == s2 && s1 != s3); // (3)
 
-            // 三角形単位で判定をする。領域内の三角形のみ追加
-            if ((_sites[0].Contains(v1)
-                 || _sites[0].Contains(v2)
-                 || _sites[0].Contains(v3)))
+            for (int j = 0; j < _sites.Count; j++)
             {
-                // ここで境界線の可視化
-                if (cond1 || cond2 || cond3 || nether)
+                // 三角形単位で判定をする。領域内の三角形のみ追加
+                if ((_sites[j].Contains(v1)
+                     || _sites[j].Contains(v2)
+                     || _sites[j].Contains(v3)))
                 {
-                    var obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                    obj.transform.localScale = Vector3.one * 0.05f;
-                    obj.transform.localPosition = mesh.vertices[v1];
+                    // ここで境界線の可視化
+                    if (cond1 || cond2 || cond3 || nether)
+                    {
+                        var obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                        obj.transform.localScale = Vector3.one * 0.05f;
+                        obj.transform.localPosition = mesh.vertices[v1];
 
-                    var obj1 = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                    obj1.transform.localScale = Vector3.one * 0.05f;
-                    obj1.transform.localPosition = mesh.vertices[v2];
+                        var obj1 = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                        obj1.transform.localScale = Vector3.one * 0.05f;
+                        obj1.transform.localPosition = mesh.vertices[v2];
 
-                    var obj2 = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                    obj2.transform.localScale = Vector3.one * 0.05f;
-                    obj2.transform.localPosition = mesh.vertices[v3];
+                        var obj2 = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                        obj2.transform.localScale = Vector3.one * 0.05f;
+                        obj2.transform.localPosition = mesh.vertices[v3];
+
+                        _borders[j].Add(v1);
+                        _borders[j].Add(v2);
+                        _borders[j].Add(v3);
+                    }
+                    // () --- ()
+
+                    slicedMesh[j].SubIndices.Add(new List<int>());
+                    slicedMesh[j].AddTriangle(v1, v2, v3, 0, ref mesh);
+                    // 個々の処理自体は正しく動作しているように見えておかしな頂点の重複がある
                 }
-                // () --- ()
-
-
-                slicedMesh.SubIndices.Add(new List<int>());
-                slicedMesh.AddTriangle(v1, v2, v3, 0, ref mesh);
-                // 個々の処理自体は正しく動作しているように見えておかしな頂点の重複がある
             }
         }
 
-        return slicedMesh.ToMesh();
+        return slicedMesh;
     }
 }
