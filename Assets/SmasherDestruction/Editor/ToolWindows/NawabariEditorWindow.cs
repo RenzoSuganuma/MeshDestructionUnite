@@ -124,7 +124,7 @@ namespace GouwangDestruction.Editor
             // メッシュ編集 実行ボタン
             if (GUILayout.Button("Frag Mesh", SmasherDestructionConstantValues.GetGUIStyle_ExecuteButton()))
             {
-                var m = VictimObject.GetComponent<MeshFilter>().mesh;
+                var m = VictimObject.GetComponent<MeshFilter>().sharedMesh;
                 var vertices = m.vertices;
                 Nawabari.CreateFragmentedMeshes(_pointCount , m);
             }
