@@ -38,26 +38,26 @@ public static class Nawabari
         CreatePoints(mesh.bounds.extents, count);
         CreateSites(mesh.vertices);
         var ms = GetSeparatedMeshes(mesh);
+        
+        // 次に切断面を形成する処理を実行すればひとまず完成
 
         for (int i = 0; i < ms.Length; i++)
         {
             var obj = new GameObject($"sphere{i}", new[] { typeof(MeshFilter), typeof(MeshRenderer) });
             obj.GetComponent<MeshFilter>().sharedMesh = ms[i].ToMesh();
-        }
+            Debug.Log($"vertices {ms[i].Vertices.Count} border vertices {ms[i].BorderVertices.Count}");
 
-        return;
-        // 領域分けした頂点の可視化
-        // foreach (var site in _sites)
-        // {
-        //     var c = new Color(Random.Range(0, 1f), Random.Range(0, 1f), Random.Range(0, 1f));
-        //     foreach (var i in site)
-        //     {
-        //         var obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        //         obj.transform.localScale = Vector3.one * 0.05f;
-        //         obj.transform.localPosition = mesh.vertices[i];
-        //         obj.GetComponent<MeshRenderer>().material.color = c;
-        //     }
-        // }
+
+            foreach (var seperatedMesh in ms)
+            {
+                foreach (var vertex in seperatedMesh.BorderVertices)
+                {
+                    var c = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    c.transform.localScale = Vector3.one * 0.05f;
+                    c.transform.localPosition = mesh.vertices[vertex];
+                }
+            }
+        }
     }
 
     private static void ClearAll()
@@ -135,11 +135,11 @@ public static class Nawabari
 
     private static SeperatedMesh[] GetSeparatedMeshes(Mesh mesh)
     {
-        var slicedMesh = new SeperatedMesh[_sites.Count];
+        var seperatedMeshes = new SeperatedMesh[_sites.Count];
 
         for (int i = 0; i < _sites.Count; i++)
         {
-            slicedMesh[i] = new SeperatedMesh();
+            seperatedMeshes[i] = new SeperatedMesh();
         }
 
         // 三角形単位でループを実行
@@ -167,49 +167,58 @@ public static class Nawabari
                 // 三角形の頂点すべてがその両位以内なら
                 if (c1 && c2 && c3)
                 {
-                    slicedMesh[j].SubIndices.Add(new List<int>());
-                    slicedMesh[j].AddTriangle(v1, v2, v3, 0, ref mesh);
+                    seperatedMeshes[j].SubIndices.Add(new List<int>());
+                    seperatedMeshes[j].AddTriangle(v1, v2, v3, 0, ref mesh);
                     // 個々の処理自体は正しく動作しているように見えておかしな頂点の重複がある
                 }
                 // すくなくとも１つほかの領域にある場合には
                 // その３つは境界線を構成することが保証される
                 else
                 {
-                    for (int k = 0; k < _sites.Count; k++)
+                    var s1 = FindSite(v1);
+                    var s2 = FindSite(v2);
+                    var s3 = FindSite(v3);
+
+                    // 現在参照している領域の所属の頂点が境界線を構成し、
+                    // まだ境界線を構成する頂点インデックスのリストに登録がないなら登録を実行する
+                    if (s1 == j && !seperatedMeshes[j].BorderVertices.Contains(v1))
                     {
-                        if (_sites[k].Contains(v1))
-                        {
-                            if (!_borders[k].Contains(v1))
-                            {
-                                _borders[k].Add(v1);
-                            }
-                        }
+                        seperatedMeshes[j].BorderVertices.Add(v1);
+                    }
 
-                        if (_sites[k].Contains(v2))
-                        {
-                            if (!_borders[k].Contains(v2))
-                            {
-                                _borders[k].Add(v2);
-                            }
-                        }
+                    if (s2 == j && !seperatedMeshes[j].BorderVertices.Contains(v2))
+                    {
+                        seperatedMeshes[j].BorderVertices.Add(v2);
+                    }
 
-                        if (_sites[k].Contains(v3))
-                        {
-                            if (!_borders[k].Contains(v3))
-                            {
-                                _borders[k].Add(v3);
-                            }
-                        }
+                    if (s3 == j && !seperatedMeshes[j].BorderVertices.Contains(v3))
+                    {
+                        seperatedMeshes[j].BorderVertices.Add(v3);
                     }
                 }
             }
         }
+        
+        return seperatedMeshes;
+    }
 
-        for (int i = 0; i < _borders.Count; i++)
+    /// <summary>
+    /// 渡される頂点のインデックスからその頂点の所属領域のインデックスを返す
+    /// </summary>
+    /// <param name="vertexIndex">頂点のインデックス</param>
+    /// <returns>所属する領域のインデックス</returns>
+    private static int FindSite(int vertexIndex)
+    {
+        if (_sites.Count is 0) return -1;
+        
+        for (int i = 0; i < _sites.Count; i++)
         {
-            Debug.Log($"b{i}, {_borders[i].Count}");
+            if (_sites[i].Contains(vertexIndex))
+            {
+                return i;
+            }
         }
 
-        return slicedMesh;
+        return -1;
     }
 }
