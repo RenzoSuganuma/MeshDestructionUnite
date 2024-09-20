@@ -133,7 +133,6 @@ public static class Nawabari
         }
     }
 
-    // $ ↓ 領域１しかまだ抽出できない ↓ $
     private static SeperatedMesh[] GetSeparatedMeshes(Mesh mesh)
     {
         var slicedMesh = new SeperatedMesh[_sites.Count];
@@ -161,156 +160,39 @@ public static class Nawabari
             // 条件
             bool cond1, cond2, cond3, nether;
             // 各頂点の所属領域
-            int s1 = 0, s2 = 0, s3 = 0;
+            int s1 = -1, s2 = -1, s3 = -1;
 
-            // 各頂点が所属する領域を求める
+            _borders = new();
             for (int j = 0; j < _sites.Count; j++)
             {
                 _borders.Add(new List<int>());
-                var site = _sites[j];
-                if (site.Contains(v1))
-                {
-                    s1 = j;
-                }
-
-                if (site.Contains(v2))
-                {
-                    s2 = j;
-                }
-
-                if (site.Contains(v3))
-                {
-                    s3 = j;
-                }
             }
-
-            // パターンを求める
-            nether = (s1 != s2 && s1 != s3 && s2 != s3); // (4)
-            cond1 = (s2 == s3 && s2 != s1); // (1)
-            cond2 = (s1 == s3 && s1 != s2); // (2)
-            cond3 = (s1 == s2 && s1 != s3); // (3)
 
             // NOTE: ２つの領域に存在する辺が領域の境界線を構成するはず
 
             for (int j = 0; j < _sites.Count; j++)
             {
                 // 三角形単位で判定をする。領域内の三角形のみ追加
-                if ((_sites[j].Contains(v1)
-                     || _sites[j].Contains(v2)
-                     || _sites[j].Contains(v3)))
+                // 三角形の頂点すべてがその両位以内なら
+                if (_sites[j].Contains(v1)
+                     && _sites[j].Contains(v2)
+                     && _sites[j].Contains(v3))
                 {
-                    // ここで境界線の可視化
-                    if (cond1 || cond2 || cond3 || nether)
-                    {
-                        // var obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                        // obj.transform.localScale = Vector3.one * 0.05f;
-                        // obj.transform.localPosition = mesh.vertices[v1];
-                        //
-                        // var obj1 = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                        // obj1.transform.localScale = Vector3.one * 0.05f;
-                        // obj1.transform.localPosition = mesh.vertices[v2];
-                        //
-                        // var obj2 = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                        // obj2.transform.localScale = Vector3.one * 0.05f;
-                        // obj2.transform.localPosition = mesh.vertices[v3];
-
-                        _borders[j].Add(v1);
-                        _borders[j].Add(v2);
-                        _borders[j].Add(v3);
-                    }
-                    // () --- ()
-
                     slicedMesh[j].SubIndices.Add(new List<int>());
                     slicedMesh[j].AddTriangle(v1, v2, v3, 0, ref mesh);
                     // 個々の処理自体は正しく動作しているように見えておかしな頂点の重複がある
                 }
-            }
-
-            // 各領域を構成する頂点の抽出
-            List<List<int>> confirmedborders = new();
-
-            // extracted vertex site
-            var evs1 = -1;
-            var evs2 = -1;
-            var evs3 = -1;
-            for (int j = 0; j < _borders.Count; j++)
-            {
-                confirmedborders.Add(new List<int>());
-
-                for (int k = 0; k < _borders[j].Count; k += 3)
+                // すくなくとも１つほかの領域にある場合には
+                else
                 {
-                    // extracted vertex
-                    var ev1 = _borders[j][k];
-                    var ev2 = _borders[j][k + 1];
-                    var ev3 = _borders[j][k + 2];
-
-                    // 初回の初期化
-                    if (evs1 is -1 && _borders[j].Contains(ev1))
-                    {
-                        evs1 = j;
-                    }
-                    // 前回検索出来た頂点１の所属領域が今回の検索でひっかかったものと違ったら
-                    else if (evs1 != j && _borders[j].Contains(ev1))
-                    {
-                        if (!confirmedborders[j].Contains(ev1))
-                        {
-                            confirmedborders[j].Add(ev1);
-                        }
-
-                        if (!confirmedborders[evs1].Contains(ev1))
-                        {
-                            confirmedborders[evs1].Add(ev1);
-                        }
-                    }
-
-                    if (evs2 is -1 && _borders[j].Contains(ev2))
-                    {
-                        evs2 = j;
-                    }
-                    else if (evs2 != j && _borders[j].Contains(ev2))
-                    {
-                        if (!confirmedborders[j].Contains(ev2))
-                        {
-                            confirmedborders[j].Add(ev2);
-                        }
-
-                        if (!confirmedborders[evs2].Contains(ev2))
-                        {
-                            confirmedborders[evs2].Add(ev2);
-                        }
-                    }
-
-                    if (evs3 is -1 && _borders[j].Contains(ev3))
-                    {
-                        evs3 = j;
-                    }
-                    else if (evs3 != j && _borders[j].Contains(ev3))
-                    {
-                        if (!confirmedborders[j].Contains(ev3))
-                        {
-                            confirmedborders[j].Add(ev3);
-                        }
-
-                        if (!confirmedborders[evs3].Contains(ev3))
-                        {
-                            confirmedborders[evs3].Add(ev3);
-                        }
-                    }
+                    // ここで頂点の抽出を実行する
                 }
             }
+        }
 
-            // デバッグ
-            foreach (var confirmedborder in confirmedborders)
-            {
-                foreach (var i1 in confirmedborder)
-                {
-                    var obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                    obj.transform.localScale = Vector3.one * 0.05f;
-                    obj.transform.localPosition = mesh.vertices[i1];
-                }
-            }
-            
-            confirmedborders.Clear();
+        for (int i = 0; i < _borders.Count; i++)
+        {
+            Debug.Log($"b{i}, {_borders[i].Count}");
         }
 
         return slicedMesh;
