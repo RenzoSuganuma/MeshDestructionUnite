@@ -309,6 +309,8 @@ public static class Nawabari
                     obj.transform.localPosition = mesh.vertices[i1];
                 }
             }
+            
+            confirmedborders.Clear();
         }
 
         return slicedMesh;
