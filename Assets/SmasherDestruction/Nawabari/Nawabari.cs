@@ -149,19 +149,6 @@ public static class Nawabari
             var v2 = mesh.triangles[i + 1]; // 頂点２
             var v3 = mesh.triangles[i + 2]; // 頂点３
 
-            // 境界線を構成する頂点の抽出
-            // 条件 
-            // v1,v2,v3 のうち少なくとも１つほかの２つと所属する領域が違うなら
-            // その３つの頂点は境界線を構成する
-            // パターン （条件）
-            // v1->v2,v3 (1) | v2->v1,v3 (2) | v3->v1,v2 (3)
-            // nether = v1 -> v2 | v1 -> v3 | v2 -> v3 ３つとも違う所属 (4)
-
-            // 条件
-            bool cond1, cond2, cond3, nether;
-            // 各頂点の所属領域
-            int s1 = -1, s2 = -1, s3 = -1;
-
             _borders = new();
             for (int j = 0; j < _sites.Count; j++)
             {
@@ -172,20 +159,48 @@ public static class Nawabari
 
             for (int j = 0; j < _sites.Count; j++)
             {
+                bool c1, c2, c3; // condition1,2,3
+                c1 = _sites[j].Contains(v1);
+                c2 = _sites[j].Contains(v2);
+                c3 = _sites[j].Contains(v3);
                 // 三角形単位で判定をする。領域内の三角形のみ追加
                 // 三角形の頂点すべてがその両位以内なら
-                if (_sites[j].Contains(v1)
-                     && _sites[j].Contains(v2)
-                     && _sites[j].Contains(v3))
+                if (c1 && c2 && c3)
                 {
                     slicedMesh[j].SubIndices.Add(new List<int>());
                     slicedMesh[j].AddTriangle(v1, v2, v3, 0, ref mesh);
                     // 個々の処理自体は正しく動作しているように見えておかしな頂点の重複がある
                 }
                 // すくなくとも１つほかの領域にある場合には
+                // その３つは境界線を構成することが保証される
                 else
                 {
-                    // ここで頂点の抽出を実行する
+                    for (int k = 0; k < _sites.Count; k++)
+                    {
+                        if (_sites[k].Contains(v1))
+                        {
+                            if (!_borders[k].Contains(v1))
+                            {
+                                _borders[k].Add(v1);
+                            }
+                        }
+
+                        if (_sites[k].Contains(v2))
+                        {
+                            if (!_borders[k].Contains(v2))
+                            {
+                                _borders[k].Add(v2);
+                            }
+                        }
+
+                        if (_sites[k].Contains(v3))
+                        {
+                            if (!_borders[k].Contains(v3))
+                            {
+                                _borders[k].Add(v3);
+                            }
+                        }
+                    }
                 }
             }
         }
