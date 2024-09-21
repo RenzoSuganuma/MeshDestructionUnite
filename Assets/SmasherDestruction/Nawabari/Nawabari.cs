@@ -50,23 +50,16 @@ public static class Nawabari
         var ms = GetSeparatedMeshes(mesh);
 
         // 次に切断面を形成する処理を実行すればひとまず完成
+        for (int j = 0; j < ms.Length; j++)
+        {
+            FindVerticesMakeNewFace(mesh, ref ms[j]);
+        }
 
         for (int i = 0; i < ms.Length; i++)
         {
             var obj = new GameObject($"sphere{i}", new[] { typeof(MeshFilter), typeof(MeshRenderer) });
             obj.GetComponent<MeshFilter>().sharedMesh = ms[i].ToMesh();
             Debug.Log($"vertices {ms[i].Vertices.Count} border vertices {ms[i].BorderVerticesIndices.Count}");
-
-
-            foreach (var seperatedMesh in ms)
-            {
-                foreach (var vertex in seperatedMesh.BorderVerticesIndices)
-                {
-                    var c = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                    c.transform.localScale = Vector3.one * 0.05f;
-                    c.transform.localPosition = mesh.vertices[vertex];
-                }
-            }
         }
     }
 
@@ -75,6 +68,8 @@ public static class Nawabari
         _points.Clear();
         _sites.Clear();
         _borders.Clear();
+        _capVerticesChecked.Clear();
+        _capVerticesPolygon.Clear();
     }
 
     /// <summary>
@@ -218,11 +213,22 @@ public static class Nawabari
     /// <summary>
     /// 切断処理で新たに生成された頂点に基づいてカット面の生成をする
     /// </summary>
-    private static void FindVerticesMakeNewFace(ref SeperatedMesh seperatedMesh)
+    private static void FindVerticesMakeNewFace(Mesh source, ref SeperatedMesh seperatedMesh)
     {
         _capVerticesChecked.Clear();
 
-        for (int i = 0; i < seperatedMesh.BorderVerticesIndices.Count; i++)
+        if (seperatedMesh.BorderVerticesPos.Count % 2 != 0
+            && seperatedMesh.BorderVerticesIndices.Count % 2 != 0)
+        {
+            var count = seperatedMesh.BorderVerticesPos.Count;
+            var newpos = Vector3.Lerp(seperatedMesh.BorderVerticesPos[count - 1],
+                seperatedMesh.BorderVerticesPos[count - 2], 0.5f);
+            var newind = source.vertices.Length;
+            
+            seperatedMesh.BorderVerticesPos.Add(newpos);
+        }
+
+        for (int i = 0; i < seperatedMesh.BorderVerticesIndices.Count; i+=2)
         {
             // 調査済みはとばす
             if (_capVerticesChecked.Contains(seperatedMesh.BorderVerticesPos[i]))
@@ -277,6 +283,13 @@ public static class Nawabari
     private static void FillFaceFromVertices(List<Vector3> vertices, ref SeperatedMesh seperatedMesh)
     {
         Vector3 center = Vector3.zero; // 中心と各頂点を結んで三角形を形成するのでこれを定義
+
+        foreach (var vertex in vertices)
+        {
+            var c = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            c.transform.localScale =Vector3.one* 0.05f;
+            c.transform.position = vertex;
+        }
 
         foreach (var vert in vertices)
         {
