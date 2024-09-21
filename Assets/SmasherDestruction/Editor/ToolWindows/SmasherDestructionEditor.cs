@@ -30,10 +30,17 @@ namespace GouwangDestruction.Editor
         }
         
         [MenuItem("Window/SmasherDestruction/NawabariModoki")]
-        public static void ShowNawabariWindow()
+        public static void ShowNawabariModokiWindow()
         {
             var window = GetWindow<NawabariModokiEditorWindow>();
             window.titleContent = new GUIContent("NawabariModokiWindow");
+        }
+        
+        [MenuItem("Window/SmasherDestruction/Nawabari")]
+        public static void ShowNawabariWindow()
+        {
+            var window = GetWindow<NawabariEditorWindow>();
+            window.titleContent = new GUIContent("NawabariWindow");
         }
 
         static GameObject InstantiateCutterPlane()
