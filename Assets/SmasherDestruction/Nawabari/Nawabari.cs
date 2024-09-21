@@ -26,8 +26,18 @@ public static class Nawabari
     /// </summary>
     private static List<List<int>> _sites = new();
 
+    private static List<Vector3> _capVerticesChecked = new();
+    private static List<Vector3> _capVerticesPolygon = new();
+
+    /// <summary>
+    /// 母点のリスト
+    /// </summary>
     public static List<Vector3> Points => _points;
 
+    /// <summary>
+    /// 領域のリスト。インデックスで領域に所属する
+    /// 頂点のインデックスのリストにアクセスできる
+    /// </summary>
     public static List<List<int>> Sites => _sites;
 
 
@@ -38,19 +48,19 @@ public static class Nawabari
         CreatePoints(mesh.bounds.extents, count);
         CreateSites(mesh.vertices);
         var ms = GetSeparatedMeshes(mesh);
-        
+
         // 次に切断面を形成する処理を実行すればひとまず完成
 
         for (int i = 0; i < ms.Length; i++)
         {
             var obj = new GameObject($"sphere{i}", new[] { typeof(MeshFilter), typeof(MeshRenderer) });
             obj.GetComponent<MeshFilter>().sharedMesh = ms[i].ToMesh();
-            Debug.Log($"vertices {ms[i].Vertices.Count} border vertices {ms[i].BorderVertices.Count}");
+            Debug.Log($"vertices {ms[i].Vertices.Count} border vertices {ms[i].BorderVerticesIndices.Count}");
 
 
             foreach (var seperatedMesh in ms)
             {
-                foreach (var vertex in seperatedMesh.BorderVertices)
+                foreach (var vertex in seperatedMesh.BorderVerticesIndices)
                 {
                     var c = GameObject.CreatePrimitive(PrimitiveType.Cube);
                     c.transform.localScale = Vector3.one * 0.05f;
@@ -181,25 +191,161 @@ public static class Nawabari
 
                     // 現在参照している領域の所属の頂点が境界線を構成し、
                     // まだ境界線を構成する頂点インデックスのリストに登録がないなら登録を実行する
-                    if (s1 == j && !seperatedMeshes[j].BorderVertices.Contains(v1))
+                    if (s1 == j && !seperatedMeshes[j].BorderVerticesIndices.Contains(v1))
                     {
-                        seperatedMeshes[j].BorderVertices.Add(v1);
+                        seperatedMeshes[j].BorderVerticesIndices.Add(v1);
+                        seperatedMeshes[j].BorderVerticesPos.Add(mesh.vertices[v1]);
                     }
 
-                    if (s2 == j && !seperatedMeshes[j].BorderVertices.Contains(v2))
+                    if (s2 == j && !seperatedMeshes[j].BorderVerticesIndices.Contains(v2))
                     {
-                        seperatedMeshes[j].BorderVertices.Add(v2);
+                        seperatedMeshes[j].BorderVerticesIndices.Add(v2);
+                        seperatedMeshes[j].BorderVerticesPos.Add(mesh.vertices[v2]);
                     }
 
-                    if (s3 == j && !seperatedMeshes[j].BorderVertices.Contains(v3))
+                    if (s3 == j && !seperatedMeshes[j].BorderVerticesIndices.Contains(v3))
                     {
-                        seperatedMeshes[j].BorderVertices.Add(v3);
+                        seperatedMeshes[j].BorderVerticesIndices.Add(v3);
+                        seperatedMeshes[j].BorderVerticesPos.Add(mesh.vertices[v3]);
                     }
                 }
             }
         }
-        
+
         return seperatedMeshes;
+    }
+
+    /// <summary>
+    /// 切断処理で新たに生成された頂点に基づいてカット面の生成をする
+    /// </summary>
+    private static void FindVerticesMakeNewFace(ref SeperatedMesh seperatedMesh)
+    {
+        _capVerticesChecked.Clear();
+
+        for (int i = 0; i < seperatedMesh.BorderVerticesIndices.Count; i++)
+        {
+            // 調査済みはとばす
+            if (_capVerticesChecked.Contains(seperatedMesh.BorderVerticesPos[i]))
+            {
+                continue;
+            }
+
+            _capVerticesPolygon.Clear();
+
+            _capVerticesPolygon.Add(seperatedMesh.BorderVerticesPos[i]);
+            _capVerticesPolygon.Add(seperatedMesh.BorderVerticesPos[i + 1]);
+
+            _capVerticesChecked.Add(seperatedMesh.BorderVerticesPos[i]);
+            _capVerticesChecked.Add(seperatedMesh.BorderVerticesPos[i + 1]);
+
+            bool isDone = false;
+            while (!isDone)
+            {
+                isDone = true;
+
+                for (int k = 0; k < seperatedMesh.BorderVerticesPos.Count; k += 2)
+                {
+                    // 【新頂点のペアを探す】
+                    if (seperatedMesh.BorderVerticesPos[k] == _capVerticesPolygon[_capVerticesPolygon.Count - 1] &&
+                        !_capVerticesChecked.Contains(seperatedMesh.BorderVerticesPos[k + 1]))
+                    {
+                        // ペアの頂点を見つけたらポリゴン配列へ追加、次のループを回す。
+                        isDone = false;
+                        _capVerticesPolygon.Add(seperatedMesh.BorderVerticesPos[k + 1]);
+                        _capVerticesChecked.Add(seperatedMesh.BorderVerticesPos[k + 1]);
+                    }
+                    else if (seperatedMesh.BorderVerticesPos[k + 1] ==
+                             _capVerticesPolygon[_capVerticesPolygon.Count - 1] &&
+                             !_capVerticesChecked.Contains(seperatedMesh.BorderVerticesPos[k]))
+                    {
+                        isDone = false;
+                        _capVerticesPolygon.Add(seperatedMesh.BorderVerticesPos[k]);
+                        _capVerticesChecked.Add(seperatedMesh.BorderVerticesPos[k]);
+                    }
+                }
+            }
+
+            // ポリゴン形成
+            FillFaceFromVertices(_capVerticesPolygon, ref seperatedMesh);
+        }
+    }
+
+    /// <summary>
+    /// 渡された頂点の配列の基づいてポリゴンの形成をする
+    /// </summary>
+    /// <param name="vertices">ポリゴンの頂点リスト</param>
+    private static void FillFaceFromVertices(List<Vector3> vertices, ref SeperatedMesh seperatedMesh)
+    {
+        Vector3 center = Vector3.zero; // 中心と各頂点を結んで三角形を形成するのでこれを定義
+
+        foreach (var vert in vertices)
+        {
+            center += vert;
+        }
+
+        center /= vertices.Count;
+
+        Vector3 upward = Vector3.zero;
+        var blade = new Plane();
+        blade.Set3Points(
+            vertices[0],
+            vertices[vertices.Count / 2],
+            vertices[vertices.Count - 1]);
+
+        // 90度回転。 平面の左側を上とする
+        upward.x = blade.normal.y;
+        upward.y = -blade.normal.x;
+        upward.z = blade.normal.z;
+
+        Vector3 left = Vector3.Cross(blade.normal, upward);
+
+        Vector3 displacement = Vector3.zero;
+        Vector3 newUv1 = Vector3.zero;
+        Vector3 newUv2 = Vector3.zero;
+
+        for (int i = 0; i < vertices.Count; i++)
+        {
+            // 中心からの頂点へのベクトル
+            displacement = vertices[i] - center;
+
+            // uv値をとる
+            newUv1 = Vector3.zero;
+            newUv1.x = .5f + Vector3.Dot(displacement, left);
+            newUv1.y = .5f + Vector3.Dot(displacement, upward);
+            newUv1.z = .5f + Vector3.Dot(displacement, blade.normal);
+
+            // 最後の頂点は最初の頂点を利用するのでインデックスを循環させる
+            displacement = vertices[(i + 1) % vertices.Count] - center;
+
+            newUv2 = Vector3.zero;
+            newUv2.x = .5f + Vector3.Dot(displacement, left);
+            newUv2.y = .5f + Vector3.Dot(displacement, upward);
+            newUv2.z = .5f + Vector3.Dot(displacement, blade.normal);
+
+            seperatedMesh.AddTriangle(
+                new Vector3[]
+                {
+                    vertices[i],
+                    vertices[(i + 1) % vertices.Count],
+                    center
+                },
+                new Vector3[]
+                {
+                    -blade.normal,
+                    -blade.normal,
+                    -blade.normal
+                },
+                new Vector2[]
+                {
+                    newUv1,
+                    newUv2,
+                    Vector2.one * .5f
+                },
+                -blade.normal,
+                // カット面をサブメッシュとして登録
+                seperatedMesh.SubIndices.Count - 1
+            );
+        }
     }
 
     /// <summary>
@@ -210,7 +356,7 @@ public static class Nawabari
     private static int FindSite(int vertexIndex)
     {
         if (_sites.Count is 0) return -1;
-        
+
         for (int i = 0; i < _sites.Count; i++)
         {
             if (_sites[i].Contains(vertexIndex))

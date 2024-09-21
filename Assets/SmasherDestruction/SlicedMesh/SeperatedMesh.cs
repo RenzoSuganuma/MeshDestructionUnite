@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace SmasherDestruction.Datas
 {
@@ -10,6 +11,8 @@ namespace SmasherDestruction.Datas
         /// <summary>
         /// 境界線を構成する頂点群
         /// </summary>
-        public List<int> BorderVertices = new();
+        public List<int> BorderVerticesIndices = new();
+
+        public List<Vector3> BorderVerticesPos = new();
     }
 }

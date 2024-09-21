@@ -113,7 +113,7 @@ namespace SmasherDestruction.Editor
             }
 
             // 処理
-            FillFace();
+            FindVerticesMakeNewFace();
 
             // 左側のメッシュを生成
             var leftHalfMesh = _leftMesh.ToMesh();
@@ -317,7 +317,7 @@ namespace SmasherDestruction.Editor
         /// <summary>
         /// 切断処理で新たに生成された頂点に基づいてカット面の生成をする
         /// </summary>
-        private static void FillFace()
+        private static void FindVerticesMakeNewFace()
         {
             _capVerticesChecked.Clear();
 
