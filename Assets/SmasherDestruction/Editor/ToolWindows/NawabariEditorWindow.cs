@@ -23,7 +23,6 @@ namespace GouwangDestruction.Editor
 
         private List<GameObject> _fragmentsObjects = new List<GameObject>();
         private GameObject _fragmentsParent;
-        private GameObject _copiedParent;
         private string _meshName;
         private int _pointCount;
         private bool _makeGap;
@@ -125,8 +124,15 @@ namespace GouwangDestruction.Editor
             if (GUILayout.Button("Frag Mesh", SmasherDestructionConstantValues.GetGUIStyle_ExecuteButton()))
             {
                 var m = VictimObject.GetComponent<MeshFilter>().sharedMesh;
-                var vertices = m.vertices;
-                Nawabari.CreateFragmentedMeshes(_pointCount, VictimObject, InsideMaterial, _makeGap);
+                Nawabari.CreateFragmentedMeshes(
+                    _pointCount,
+                    VictimObject,
+                    InsideMaterial,
+                    _makeGap,
+                    _fragmentsObjects);
+
+                // １つのオブジェクトとして保存するので親になるオブジェクトを生成
+                _fragmentsParent = new GameObject();
             }
 
             GUILayout.Space(10);
@@ -160,13 +166,6 @@ namespace GouwangDestruction.Editor
             if (_fragmentsParent is not null)
             {
                 _fragmentsParent.SetActive(true);
-            }
-
-            // 強調用のオブジェクトを破棄
-            if (_copiedParent is not null)
-            {
-                GameObject.DestroyImmediate(_copiedParent);
-                _copiedParent = null;
             }
         }
 
@@ -204,11 +203,14 @@ namespace GouwangDestruction.Editor
             #region 保存処理
 
             // 断片化されたメッシュのアセットとしての保存処理
+            // と１つのオブジェクトにまとめる処理
             for (int i = 0; i < _fragmentsObjects.Count; ++i)
             {
                 var mesh = _fragmentsObjects[i].GetComponent<MeshFilter>().sharedMesh;
 
                 SmasherDestructionEditorUtility.CreateAndSaveToAsset(mesh, _meshName, i);
+
+                _fragmentsObjects[i].transform.SetParent(_fragmentsParent.transform);
             }
 
             // プレハブとして保存

@@ -40,19 +40,24 @@ public static class Nawabari
 
 
     public static void CreateFragmentedMeshes(
-        int count, 
+        int count,
         GameObject sourceObject,
-        Material insideMaterial, 
-        bool makeGap)
+        Material insideMaterial,
+        bool makeGap,
+        List<GameObject> resultFragments)
     {
         ClearAll();
         var mesh = sourceObject.GetComponent<MeshFilter>().sharedMesh;
         CreatePoints(mesh.bounds.extents, count);
         CreateSites(mesh.vertices);
-        ExecuteFragmentation(sourceObject, insideMaterial, makeGap);
+        ExecuteFragmentation(sourceObject, insideMaterial, makeGap,resultFragments);
     }
 
-    private static void ExecuteFragmentation(GameObject sourceObject, Material insideMaterial , bool makeGap)
+    private static void ExecuteFragmentation(
+        GameObject sourceObject,
+        Material insideMaterial,
+        bool makeGap,
+        List<GameObject> resultFragments)
     {
         GameObject[] copiedSource = new GameObject[_points.Count];
 
@@ -60,7 +65,7 @@ public static class Nawabari
         {
             copiedSource[i] = GameObject.Instantiate(sourceObject);
 
-            SeparateByVoronoiEdge(copiedSource[i], insideMaterial, i, makeGap);
+            resultFragments.Add(SeparateByVoronoiEdge(copiedSource[i], insideMaterial, i, makeGap));
         }
     }
 
@@ -88,11 +93,6 @@ public static class Nawabari
 
             _points.Add(v); // 母点の追加
             _sites.Add(new List<int>()); // 領域に頂点のインデックスを追加する
-
-            var c = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-            c.transform.localScale = Vector3.one * .05f;
-            c.transform.position = v;
-            c.name = $"site{i}";
         }
     }
 
@@ -141,7 +141,7 @@ public static class Nawabari
             }
         }
     }
-    
+
     /// <summary>
     /// 渡されたオブジェクトをしてされた領域のインデックスの領域の通りに抽出
     /// </summary>
@@ -149,10 +149,11 @@ public static class Nawabari
     /// <param name="insideMaterial">内側のマテリアル</param>
     /// <param name="extractTargetSitesIndex">抽出する領域のインデックス</param>
     /// <param name="makeGap">隙間を空けるか</param>
-    private static void SeparateByVoronoiEdge(GameObject sourceObject, Material insideMaterial, int extractTargetSitesIndex, bool makeGap)
+    private static GameObject SeparateByVoronoiEdge(GameObject sourceObject, Material insideMaterial,
+        int extractTargetSitesIndex, bool makeGap)
     {
         // NOTE: ここで指定された領域の抽出を実行している
-        
+
         GameObject fragment = sourceObject;
 
         // 指定された領域の境界線を求める
@@ -178,5 +179,7 @@ public static class Nawabari
         }
 
         fragment.name = $"ExtractedMesh{extractTargetSitesIndex}";
+
+        return fragment;
     }
 }
