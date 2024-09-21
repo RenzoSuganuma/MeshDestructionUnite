@@ -126,7 +126,7 @@ namespace GouwangDestruction.Editor
             {
                 var m = VictimObject.GetComponent<MeshFilter>().sharedMesh;
                 var vertices = m.vertices;
-                Nawabari.CreateFragmentedMeshes(_pointCount , m);
+                Nawabari.CreateFragmentedMeshes(_pointCount, VictimObject, InsideMaterial, _makeGap);
             }
 
             GUILayout.Space(10);

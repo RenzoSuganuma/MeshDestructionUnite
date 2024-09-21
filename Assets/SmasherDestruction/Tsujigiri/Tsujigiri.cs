@@ -321,7 +321,7 @@ namespace SmasherDestruction.Editor
         {
             _capVerticesChecked.Clear();
 
-            for (int i = 0; i < _newVerticesPos.Count; i++)
+            for (int i = 0; i < _newVerticesPos.Count; i += 2) // ;i++ → i+= 2
             {
                 // 調査済みはとばす
                 if (_capVerticesChecked.Contains(_newVerticesPos[i]))
